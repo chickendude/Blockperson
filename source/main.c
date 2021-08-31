@@ -5,9 +5,19 @@
 
 #define TILE(n) (n * 4 + 1)
 
-//---------------------------------------------------------------------------------
+/**
+ * Initialize game data.
+ *
+ * Prepare background registers, load sprites and tiles, etc.
+ */
+void initialize();
+
+/** Main game loop. */
+void play();
+
+//------------------------------------------------------------------------------
 // Program entry point
-//---------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 char *map = "B                  B"
             "B                  B"
@@ -58,6 +68,13 @@ void draw_tilemap(int start_x, int start_y)
 int main(void)
 {
 //---------------------------------------------------------------------------------
+    initialize();
+    play();
+    return 0;
+}
+
+void initialize()
+{
     // Copy tile and palette data
     memcpy32(&tile_mem[0][1], tilesTiles, tilesTilesLen / 4);
     memcpy32(pal_bg_mem, tilesPal, tilesPalLen / 4);
@@ -70,7 +87,10 @@ int main(void)
     // Tiles should be at the first character block, maps should be in the last
     // Screen block
     REG_BG0CNT = BG_CBB(0) | BG_SBB(30) | BG_REG_64x32;
+}
 
+void play()
+{
     int sx = 0;
     int sy = 0;
 
@@ -89,6 +109,4 @@ int main(void)
         if (sy < 0) sy = 0;
         if (sy > 8 * 16 - SCREEN_HEIGHT) sy = 8 * 16 - SCREEN_HEIGHT;
     };
-
-    return 0;
 }
