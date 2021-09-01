@@ -10,4 +10,4 @@ include_directories($ENV{DEVKITPRO}/libtonc/include/)
 include_directories($ENV{DEVKITARM}/arm-none-eabi/include)
 include_directories(include gfx)
 
-add_executable(blockperson source/main.c)
+add_executable(blockperson source/main.c source/levels.c source/maps.c)

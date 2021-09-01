@@ -1,5 +1,9 @@
 #include <tonc.h>
 #include "constants.h"
+#include "game.h"
+#include "levels.h"
+#include "maps.h"
+#include "objects.h"
 // Sprite data
 #include "tiles.h"
 
@@ -10,23 +14,14 @@
  *
  * Prepare background registers, load sprites and tiles, etc.
  */
-void initialize();
+void initialize(Game *game);
 
 /** Main game loop. */
-void play();
+_Noreturn void play(Game *game);
 
 //------------------------------------------------------------------------------
 // Program entry point
 //------------------------------------------------------------------------------
-
-char *map = "B                  B"
-            "B                  B"
-            "B                  B"
-            "B                  B"
-            "B                  B"
-            "B  B        B      B"
-            "BD B    B O B O M  B"
-            "BBBBBBBBBBBBBBBBBBBB";
 
 void draw_tile(int x, int y, int tile_id)
 {
@@ -39,7 +34,7 @@ void draw_tile(int x, int y, int tile_id)
     se_mem[sbb][y + NUM_TILES_IN_ROW + ((x + 1) & 31)] = tile_id + 3;
 }
 
-void draw_tilemap(int start_x, int start_y)
+void draw_tilemap(const Map *map, int start_x, int start_y)
 {
     se_fill(&se_mem[30][0], 0);
     se_fill(&se_mem[31][0], 0);
@@ -49,7 +44,7 @@ void draw_tilemap(int start_x, int start_y)
     {
         for (int y = 0; y < (256 / TILE_SIZE); y++)
         {
-            switch (map[(y + start_y) * 20 + (x + start_x)])
+            switch (map->tilemap[(y + start_y) * 20 + (x + start_x)])
             {
                 case 'B':
                     draw_tile(x, y, TILE(0));
@@ -67,19 +62,21 @@ void draw_tilemap(int start_x, int start_y)
 
 int main(void)
 {
-//---------------------------------------------------------------------------------
-    initialize();
-    play();
+    Game game;
+    initialize(&game);
+    play(&game);
     return 0;
 }
 
-void initialize()
+void initialize(Game *game)
 {
+    load_level(game, &level_1);
+
     // Copy tile and palette data
     memcpy32(&tile_mem[0][1], tilesTiles, tilesTilesLen / 4);
     memcpy32(pal_bg_mem, tilesPal, tilesPalLen / 4);
 
-    draw_tilemap(0, 0);
+    draw_tilemap(game->cur_level->map, game->camera.x, game->camera.y);
 
     // Enable Mode 0: 4 bgs available, but none can be rotated
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
@@ -89,24 +86,26 @@ void initialize()
     REG_BG0CNT = BG_CBB(0) | BG_SBB(30) | BG_REG_64x32;
 }
 
-void play()
+_Noreturn void play(Game *game)
 {
-    int sx = 0;
-    int sy = 0;
+//    int sx = 0;
+//    int sy = 0;
+    Camera *camera = &game->camera;
+    const Level *level = game->cur_level;
 
     while (1)
     {
         vid_vsync();
-        REG_BG0HOFS = sx % 16;
-        REG_BG0VOFS = sy % 16;
-        draw_tilemap(sx, sy);
+        REG_BG0HOFS = camera->x % 16;
+        REG_BG0VOFS = camera->y % 16;
+        draw_tilemap(level->map, camera->x, camera->y);
 
         key_poll();
-        sx += key_tri_horz() * GAME_SPEED;
-        if (sx < 0) sx = 0;
-        if (sx > 20 * 16 - SCREEN_WIDTH) sx = 20 * 16 - SCREEN_WIDTH;
-        sy += key_tri_vert() * GAME_SPEED;
-        if (sy < 0) sy = 0;
-        if (sy > 8 * 16 - SCREEN_HEIGHT) sy = 8 * 16 - SCREEN_HEIGHT;
+        camera->x += key_tri_horz() * GAME_SPEED;
+        if (camera->x < 0) camera->x = 0;
+        if (camera->x > level->map->w * 16 - SCREEN_WIDTH) camera->x = 20 * 16 - SCREEN_WIDTH;
+        camera->y += key_tri_vert() * GAME_SPEED;
+        if (camera->y < 0) camera->y = 0;
+        if (camera->y > 8 * 16 - SCREEN_HEIGHT) camera->y = 8 * 16 - SCREEN_HEIGHT;
     };
 }
