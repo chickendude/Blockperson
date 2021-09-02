@@ -1,6 +1,5 @@
 #include "levels.h"
 #include "game.h"
-#include "maps.h"
 
 const Level level_1 = {20, 8,
                    120, 0,

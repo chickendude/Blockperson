@@ -2,11 +2,10 @@
 #include "constants.h"
 #include "game.h"
 #include "levels.h"
-#include "maps.h"
 // Sprite data
 #include "tiles.h"
 
-// TODO: Load blocks as sprite objects
+// TODO: Only update edges of tilemap
 // TODO: Add player to screen
 // TODO: Add second background for parallax scrolling
 // TODO: Update camera to follow player
