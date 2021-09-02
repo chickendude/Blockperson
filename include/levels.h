@@ -4,9 +4,11 @@
 #include "types.h"
 #include "objects.h"
 
-struct Level {
-    const Map *map;
-    Block blocks[50];
+struct Level
+{
+    int w, h;
+    int start_x, start_y;
+    char *tilemap;
 };
 
 void load_level(Game *game, const Level *level);

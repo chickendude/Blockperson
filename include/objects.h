@@ -2,10 +2,13 @@
 #define BLOCKPERSON_OBJECTS_H
 
 #include <tonc.h>
+#include "types.h"
 
-typedef struct Block {
+struct Block {
     int x, y;
     bool on_ground;
-} Block;
+};
+
+void draw_blocks(OBJ_ATTR *obj_buffer, Game *game);
 
 #endif //BLOCKPERSON_OBJECTS_H
