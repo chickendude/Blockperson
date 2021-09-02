@@ -26,58 +26,8 @@ void initialize(Game *game);
 _Noreturn void play(Game *game);
 
 //------------------------------------------------------------------------------
-// Constants and macros
-//------------------------------------------------------------------------------
-#define TILE(n) (n * 4 + 1)
-
-//------------------------------------------------------------------------------
 // Program entry point
 //------------------------------------------------------------------------------
-
-void draw_tile(int x, int y, int tile_id)
-{
-    x *= TILE_SIZE / 8;
-    y *= NUM_TILES_IN_ROW * TILE_SIZE / 8;
-    int sbb = 30;
-    se_mem[sbb][y + ((x) & 31)] = tile_id;
-    se_mem[sbb][y + ((x + 1) & 31)] = tile_id + 1;
-    se_mem[sbb][y + NUM_TILES_IN_ROW + ((x) & 31)] = tile_id + 2;
-    se_mem[sbb][y + NUM_TILES_IN_ROW + ((x + 1) & 31)] = tile_id + 3;
-}
-
-void draw_tilemap(Game *game, int start_x, int start_y)
-{
-    const char *map = game->cur_level->tilemap;
-    game->num_blocks = 0;
-    se_fill(&se_mem[30][0], 0);
-    se_fill(&se_mem[31][0], 0);
-    start_x /= TILE_SIZE;
-    start_y /= TILE_SIZE;
-    for (int x = 0; x < (256 / TILE_SIZE); x++)
-    {
-        for (int y = 0; y < (256 / TILE_SIZE); y++)
-        {
-            switch (map[(y + start_y) * 20 +
-                        (x + start_x)])
-            {
-                case 'B':
-                    draw_tile(x, y, TILE(0));
-                    break;
-                case 'D':
-                    // tile id 2, 4 sprites per tile (16x16), skip first
-                    // (empty) tile
-                    draw_tile(x, y, TILE(2));
-                    break;
-                case 'O':
-                    game->blocks[game->num_blocks].x = (x + start_x) * TILE_SIZE;
-                    game->blocks[game->num_blocks].y = (y + start_y) * TILE_SIZE;
-                    game->num_blocks++;
-                    break;
-            }
-        }
-    }
-}
-
 
 int main(void)
 {
@@ -97,7 +47,7 @@ void initialize(Game *game)
     memcpy32(&tile_mem[4][1], tilesTiles, tilesTilesLen / 4);
     memcpy32(pal_obj_mem, tilesPal, tilesPalLen / 4);
 
-    draw_tilemap(game, game->camera.x, game->camera.y);
+    draw_tilemap(game);
 
     // Enable Mode 0: 4 bgs available, but none can be rotated
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ | DCNT_OBJ_1D;
@@ -129,7 +79,7 @@ _Noreturn void play(Game *game)
         REG_BG0VOFS = camera->y % 16;
         oam_copy(oam_mem, obj_buffer, game->num_blocks);
 
-        draw_tilemap(game, camera->x, camera->y);
+        draw_tilemap(game);
 
         // Key presses
         key_poll();
