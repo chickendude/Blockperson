@@ -26,7 +26,7 @@ void draw_row(int map_x, int map_y, int sb_y, const Level *level);
 
 void draw_tilemap(Game *game)
 {
-    int max_x, max_y, start_x, start_y;
+    int start_x, start_y;
     const Level *level = game->cur_level;
     const char *map = game->cur_level->tilemap;
 
@@ -37,13 +37,9 @@ void draw_tilemap(Game *game)
     start_x = game->camera.x / TILE_SIZE;
     start_y = game->camera.y / TILE_SIZE;
 
-    // If the tilemap dimensions are smaller than the screen block, make sure we
-    // don't draw data outside the tilemap
-    max_x = SB_COLS < level->w ? SB_COLS : level->w;
-    max_y = SB_ROWS < level->h ? SB_ROWS : level->h;
-    for (int x = start_x; x < max_x + start_x; x++)
+    for (int x = start_x; x < start_x + SB_COLS; x++)
     {
-        for (int y = start_y; y < max_y + start_y; y++)
+        for (int y = start_y; y < start_y + SB_ROWS; y++)
         {
             switch (map[y * level->w + x])
             {
@@ -54,10 +50,8 @@ void draw_tilemap(Game *game)
                     draw_tile(x, y, TILE(2));
                     break;
                 case 'O':
-                    game->blocks[game->num_blocks].x =
-                            x * TILE_SIZE;
-                    game->blocks[game->num_blocks].y =
-                            y * TILE_SIZE;
+                    game->blocks[game->num_blocks].x = x * TILE_SIZE;
+                    game->blocks[game->num_blocks].y = y * TILE_SIZE;
                     game->num_blocks++;
                     break;
             }
@@ -65,38 +59,31 @@ void draw_tilemap(Game *game)
     }
 }
 
-/**
- * When cam.x < prev_cam.x we are moving left
- * @param game
- */
 void update_tilemap(Game *game)
 {
     Camera *cam = &game->camera;
     Camera *prev_cam = &game->prev_camera;
     int map_x = cam->x / TILE_SIZE;
     int map_y = cam->y / TILE_SIZE;
-    int cur_x = cam->x;
-    int cur_y = cam->y;
-    int prev_x = prev_cam->x;
-    int prev_y = prev_cam->y;
 
-    // Check if moved right a tile
-    if (MOVED_R(cur_x, prev_x))
+    // Check if moved right or left a tile
+    if (MOVED_R(cam->x, prev_cam->x))
     {
         // The column to the left of the leftmost column (0 - 1 -> 31)
         int x = (map_x - 1) & 31;
         draw_column(map_x + SB_COLS - 1, map_y, x, game->cur_level);
-    } else if (MOVED_L(cur_x, prev_x))
+    } else if (MOVED_L(cam->x, prev_cam->x))
     {
         int x = (map_x) & 31;
         draw_column(map_x, map_y, x, game->cur_level);
     }
 
-    if (MOVED_D(cur_y, prev_y))
+    // Check if moved up or down a tile
+    if (MOVED_D(cam->y, prev_cam->y))
     {
         int sb_y = (map_y + 10);
         draw_row(map_x, map_y + 10, sb_y, game->cur_level);
-    } else if (MOVED_U(cur_y, prev_y))
+    } else if (MOVED_U(cam->y, prev_cam->y))
     {
         int y = (map_y) & 15;
         draw_row(map_x, map_y, y, game->cur_level);
@@ -113,7 +100,12 @@ inline void draw_tile(int x, int y, int tile_id)
     int sbb = 30;
 
     // Tiles are 16x16, but are stored in VRAM as 8x8 pixel sprites
-    x &=15;
+    // 1. Make sure coordinates fit within 0-15
+    // 2. x: Multiply by two since each 16x16 tile is actually a 2x2 set of 8x8
+    //       sprites.
+    //    y: Similar to x, but we also need to make sure it skips to the next
+    //       row in the screen block.
+    x &= 15;
     y &= 15;
     x *= TILE_SIZE / 8;
     y *= NUM_TILES_IN_ROW * TILE_SIZE / 8;
@@ -127,12 +119,14 @@ inline void draw_tile(int x, int y, int tile_id)
 
 void draw_column(int map_x, int map_y, int sb_x, const Level *level)
 {
-    int tile_id, max_y;
-    char *map = &level->tilemap[map_y * level->w + map_x];
+    int tile_id;
+    char *map;
+
+    // Grab the starting address in the map
+    map = &level->tilemap[map_y * level->w + map_x];
 
     // 10 16x16 rows fit on screen, + 1 for the offscreen tile when scrolling
-    max_y = level->h < 11 ? level->h : 11;
-    for (int y = 0; y < max_y; y++)
+    for (int y = 0; y < 11; y++)
     {
         switch (*map)
         {
@@ -156,8 +150,7 @@ void draw_row(int map_x, int map_y, int sb_y, const Level *level)
 {
     int tile_id;
     char *map = &level->tilemap[(map_y * level->w) + map_x];
-    int max_x = level->w < SB_COLS ? level->w : SB_COLS;
-    for (int x = 0; x < max_x; x++)
+    for (int x = 0; x < SB_COLS; x++)
     {
         switch (*map++)
         {
