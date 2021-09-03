@@ -7,7 +7,6 @@
 #include "blockperson.h"
 #include "tiles.h"
 
-// TODO: Only update edges of tilemap
 // TODO: Add player to screen
 // TODO: Add second background for parallax scrolling
 // TODO: Update camera to follow player
@@ -67,7 +66,8 @@ void initialize(Game *game)
     // Tiles should be at the first character block, maps should be in the last
     // Screen block
     REG_BG0CNT = BG_CBB(0) | BG_SBB(30) | BG_REG_32x32;
-
+    REG_BG0HOFS = game->camera.x;
+    REG_BG0VOFS = game->camera.y;
 }
 
 _Noreturn void play(Game *game)

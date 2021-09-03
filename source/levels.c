@@ -1,8 +1,10 @@
 #include "levels.h"
 #include "game.h"
 
-const Level level_1 = {20, 23,
-                   0, 0,
+const Level level_1 = {20, 10,
+                   64, 0,
+                   "                    "
+                   "                    "
                    "B                  B"
                    "B                  B"
                    "B                  B"
@@ -10,23 +12,7 @@ const Level level_1 = {20, 23,
                    "B                  B"
                    "B  B        B      B"
                    "BD B    B O B O M  B"
-                   "BBBBBBBBBBBBBBBBBBBB"
-                   " B   B BBBBBBBBBBBBB"
-                   "B BBBB BBB   BBBBBBB"
-                   "BB BBB BBB   BBBBBBB"
-                   "BBB BB BBBBBBBBBBBBB"
-                   "BBBB B BBBBBBBBBBBBB"
-                   "BBBBB  BBBB   BBBBBB"
-                   "BBBBBB BBBB   BBBBBB"
-                   "BBBBB BBBBBBBBBBBBBB"
-                   "BBBBB BBBBBBBBBBBBBB"
-                   "BBBB BBBBBBBBBBBBBBB"
-                   "BBBB BBBBBBBBBBBBBBB"
-                   "BBB BBBBBBBBBBBB BBB"
-                   "BBB BBBBBBBBBBBB BBB"
-                   "BBB              BBB"
-                   "BBBBBBBBBBBBBBBBBBBB"
-};
+                   "BBBBBBBBBBBBBBBBBBBB"};
 
 // -----------------------------------------------------------------------------
 // Private function declarations

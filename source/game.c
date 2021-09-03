@@ -26,7 +26,6 @@ void draw_row(int map_x, int map_y, int sb_y, const Level *level);
 
 void draw_tilemap(Game *game)
 {
-    return;
     int max_x, max_y, start_x, start_y;
     const Level *level = game->cur_level;
     const char *map = game->cur_level->tilemap;
@@ -42,23 +41,23 @@ void draw_tilemap(Game *game)
     // don't draw data outside the tilemap
     max_x = SB_COLS < level->w ? SB_COLS : level->w;
     max_y = SB_ROWS < level->h ? SB_ROWS : level->h;
-    for (int x = 0; x < max_x; x++)
+    for (int x = start_x; x < max_x + start_x; x++)
     {
-        for (int y = 0; y < max_y; y++)
+        for (int y = start_y; y < max_y + start_y; y++)
         {
-            switch (map[(y + start_y) * level->w + (x + start_x)])
+            switch (map[y * level->w + x])
             {
                 case 'B':
-                    draw_tile(x, y, TILE(1));
+                    draw_tile(x & 31, y & 31, TILE(1));
                     break;
                 case 'D':
                     draw_tile(x, y, TILE(2));
                     break;
                 case 'O':
                     game->blocks[game->num_blocks].x =
-                            (x + start_x) * TILE_SIZE;
+                            x * TILE_SIZE;
                     game->blocks[game->num_blocks].y =
-                            (y + start_y) * TILE_SIZE;
+                            y * TILE_SIZE;
                     game->num_blocks++;
                     break;
             }
@@ -91,13 +90,12 @@ void update_tilemap(Game *game)
     {
         int x = (map_x) & 31;
         draw_column(map_x, map_y, x, game->cur_level);
-//        draw_column(x, map_x, game->cur_level);
     }
 
     if (MOVED_D(cur_y, prev_y))
     {
-        int y = (map_y + 10) & 15;
-        draw_row(map_x, map_y + 10, y, game->cur_level);
+        int sb_y = (map_y + 10);
+        draw_row(map_x, map_y + 10, sb_y, game->cur_level);
     } else if (MOVED_U(cur_y, prev_y))
     {
         int y = (map_y) & 15;
@@ -115,6 +113,8 @@ inline void draw_tile(int x, int y, int tile_id)
     int sbb = 30;
 
     // Tiles are 16x16, but are stored in VRAM as 8x8 pixel sprites
+    x &=15;
+    y &= 15;
     x *= TILE_SIZE / 8;
     y *= NUM_TILES_IN_ROW * TILE_SIZE / 8;
 
@@ -127,10 +127,12 @@ inline void draw_tile(int x, int y, int tile_id)
 
 void draw_column(int map_x, int map_y, int sb_x, const Level *level)
 {
-    int tile_id;
+    int tile_id, max_y;
     char *map = &level->tilemap[map_y * level->w + map_x];
-    int max_y = SB_ROWS < level->h ? SB_ROWS : level->h;
-    for (int y = 0; y < 11; y++)
+
+    // 10 16x16 rows fit on screen, + 1 for the offscreen tile when scrolling
+    max_y = level->h < 11 ? level->h : 11;
+    for (int y = 0; y < max_y; y++)
     {
         switch (*map)
         {
@@ -154,8 +156,8 @@ void draw_row(int map_x, int map_y, int sb_y, const Level *level)
 {
     int tile_id;
     char *map = &level->tilemap[(map_y * level->w) + map_x];
-    int max_x = SB_COLS < level->w ? SB_COLS : level->w;
-    for (int x = 0; x < 16; x++)
+    int max_x = level->w < SB_COLS ? level->w : SB_COLS;
+    for (int x = 0; x < max_x; x++)
     {
         switch (*map++)
         {
@@ -168,6 +170,6 @@ void draw_row(int map_x, int map_y, int sb_y, const Level *level)
             default:
                 tile_id = TILE(0);
         }
-        draw_tile(x, sb_y, tile_id);
+        draw_tile(x + map_x, sb_y, tile_id);
     }
 }
