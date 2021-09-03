@@ -3,6 +3,8 @@
 #include "game.h"
 #include "levels.h"
 // Sprite data
+#include "block.h"
+#include "blockperson.h"
 #include "tiles.h"
 
 // TODO: Only update edges of tilemap
@@ -42,19 +44,12 @@ void initialize(Game *game)
     load_level(game, &level_1);
 
     // Copy tile and palette data
-    memcpy32(&tile_mem[0][1], tilesTiles, tilesTilesLen / 4);
+    memcpy32(&tile_mem[0][4], tilesTiles, tilesTilesLen / 4);
     memcpy32(pal_bg_mem, tilesPal, tilesPalLen / 4);
-    memcpy32(&tile_mem[4][1], tilesTiles, tilesTilesLen / 4);
-    memcpy32(pal_obj_mem, tilesPal, tilesPalLen / 4);
+    memcpy32(&tile_mem[4][1], blockTiles, blockTilesLen / 4);
+    memcpy32(pal_obj_mem, blockPal, blockPalLen / 4);
 
     draw_tilemap(game);
-
-    // Enable Mode 0: 4 bgs available, but none can be rotated
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ | DCNT_OBJ_1D;
-
-    // Tiles should be at the first character block, maps should be in the last
-    // Screen block
-    REG_BG0CNT = BG_CBB(0) | BG_SBB(30) | BG_REG_64x32;
 
     // Initialize block OAM entries
     for (int i = 0; i < NUM_BLOCKS; i++)
@@ -65,6 +60,14 @@ void initialize(Game *game)
                      ATTR2_PALBANK(0) | 5); // tile id
     }
     draw_blocks(obj_buffer, game);
+
+    // Enable Mode 0: 4 bgs available, but none can be rotated
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ | DCNT_OBJ_1D;
+
+    // Tiles should be at the first character block, maps should be in the last
+    // Screen block
+    REG_BG0CNT = BG_CBB(0) | BG_SBB(30) | BG_REG_32x32;
+
 }
 
 _Noreturn void play(Game *game)
@@ -75,11 +78,11 @@ _Noreturn void play(Game *game)
     while (1)
     {
         vid_vsync();
-        REG_BG0HOFS = camera->x % 16;
-        REG_BG0VOFS = camera->y % 16;
+        REG_BG0HOFS = camera->x;
+        REG_BG0VOFS = camera->y;
         oam_copy(oam_mem, obj_buffer, game->num_blocks);
 
-        draw_tilemap(game);
+        update_tilemap(game);
 
         // Key presses
         key_poll();
