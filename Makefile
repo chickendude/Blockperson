@@ -10,6 +10,8 @@ endif
 
 include $(DEVKITARM)/gba_rules
 
+LIBTONC := $(DEVKITPRO)/libtonc
+
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
 # BUILD is the directory where object files & intermediate files will be placed
@@ -49,7 +51,7 @@ LDFLAGS	=	-g $(ARCH) -Wl,-Map,$(notdir $*.map)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lmm -lgba -ltonc
+LIBS	:= -lmm -ltonc
 
 
 #---------------------------------------------------------------------------------
