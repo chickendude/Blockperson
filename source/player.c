@@ -8,6 +8,7 @@
 // Private function declarations
 // -----------------------------------------------------------------------------
 
+void check_keys(Player *player, const Level *level);
 
 // -----------------------------------------------------------------------------
 // Public function definitions
@@ -15,31 +16,11 @@
 
 void move_player(Game *game)
 {
-    int map_x, map_y;
     Player *player = &game->player;
     Camera *camera = &game->camera;
     const Level *level = game->cur_level;
 
-    if (player->animation_frames == 0)
-    {
-        map_x = player->x / TILE_SIZE;
-        map_y = player->y / TILE_SIZE;
-        if (key_is_down(KEY_LEFT))
-        {
-            if (level->tilemap[map_y * level->w + map_x - 1] != 'B')
-            {
-                player->dx = -GAME_SPEED;
-                player->animation_frames = 8;
-            }
-        } else if (key_is_down(KEY_RIGHT))
-        {
-            if (level->tilemap[map_y * level->w + map_x + 1] != 'B')
-            {
-                player->dx = GAME_SPEED;
-                player->animation_frames = 8;
-            }
-        }
-    }
+    check_keys(player, level);
 
     // Move player
     if (player->animation_frames > 0)
@@ -54,3 +35,30 @@ void move_player(Game *game)
 // -----------------------------------------------------------------------------
 // Private functions definitions
 // -----------------------------------------------------------------------------
+
+void check_keys(Player *player, const Level *level) {
+    int map_x, map_y;
+
+    if (player->animation_frames == 0)
+    {
+        map_x = player->x / TILE_SIZE;
+        map_y = player->y / TILE_SIZE;
+        if (key_is_down(KEY_LEFT))
+        {
+            if (level->tilemap[map_y * level->w + map_x - 1] != 'B')
+            {
+                player->dx = -GAME_SPEED;
+                player->animation_frames = 8;
+            }
+            player->oam->attr1 &= ~ATTR1_HFLIP;
+        } else if (key_is_down(KEY_RIGHT))
+        {
+            if (level->tilemap[map_y * level->w + map_x + 1] != 'B')
+            {
+                player->dx = GAME_SPEED;
+                player->animation_frames = 8;
+            }
+            player->oam->attr1 |= ATTR1_HFLIP;
+        }
+    }
+}
