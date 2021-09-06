@@ -7,9 +7,10 @@
 #include "blockperson.h"
 #include "tiles.h"
 
+// TODO: Press up to climb
+// TODO: Pick up blocks
 // TODO: Add second background for parallax scrolling
 // TODO: Update camera to follow player
-// TODO: Pick up blocks
 
 // Buffer to hold changes to OAM data so that you can update outside of VBLANK.
 // This will be copied over to OAM in VBLANK.
@@ -57,9 +58,9 @@ void initialize(Game *game)
     draw_tilemap(game);
 
     // Initialize block OAM entries
-    for (int i = 1; i <= NUM_BLOCKS; i++)
+    for (int i = 0; i < NUM_BLOCKS; i++)
     {
-        obj_set_attr(&obj_buffer[i],
+        obj_set_attr(&obj_buffer[i + 1],
                      ATTR0_SQUARE | ATTR0_4BPP | 0, // y pos
                      ATTR1_SIZE_16x16 | 0, // x pos
                      ATTR2_PALBANK(0) | 5); // tile id
@@ -86,6 +87,9 @@ _Noreturn void play(Game *game)
         vid_vsync();
         REG_BG0HOFS = camera->x;
         REG_BG0VOFS = camera->y;
+
+        // Copy buffer data to oam_mem, only sprites are the blocks and the
+        // player, hence the +1 (for the player's sprite).
         oam_copy(oam_mem, obj_buffer, game->num_blocks + 1);
 
         update_tilemap(game);
