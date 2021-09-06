@@ -27,6 +27,8 @@ void move_player(Game *game)
     {
         player->animation_frames--;
         player->x += player->dx;
+        player->oam->attr2 &= ~ATTR2_ID_MASK;
+        player->oam->attr2 |= 13 + (player->animation_frames >> 2) * 4;
     }
 
     obj_set_pos(player->oam, player->x - camera->x, player->y - camera->y);
