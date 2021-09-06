@@ -4,10 +4,12 @@
 #include "types.h"
 #include "camera.h"
 #include "objects.h"
+#include "player.h"
 
 struct Game {
     Camera camera;
     Camera prev_camera;
+    Player player;
     const Level *cur_level;
     int num_blocks;
     Block blocks[50];

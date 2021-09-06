@@ -6,5 +6,6 @@ typedef struct Camera Camera;
 typedef struct Game Game;
 typedef struct Level Level;
 typedef struct Map Map;
+typedef struct Player Player;
 
 #endif //BLOCKPERSON_TYPES_H

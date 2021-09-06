@@ -50,9 +50,13 @@ void draw_tilemap(Game *game)
                     draw_tile(x, y, TILE(2));
                     break;
                 case 'O':
-                    game->blocks[game->num_blocks].x = x * TILE_SIZE;
-                    game->blocks[game->num_blocks].y = y * TILE_SIZE;
+                    game->blocks[game->num_blocks + 1].x = x * TILE_SIZE;
+                    game->blocks[game->num_blocks + 1].y = y * TILE_SIZE;
                     game->num_blocks++;
+                    break;
+                case 'M':
+                    game->player.x = x * TILE_SIZE;
+                    game->player.y = y * TILE_SIZE;
                     break;
             }
         }

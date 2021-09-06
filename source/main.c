@@ -7,7 +7,6 @@
 #include "blockperson.h"
 #include "tiles.h"
 
-// TODO: Add player to screen
 // TODO: Add second background for parallax scrolling
 // TODO: Update camera to follow player
 // TODO: Pick up blocks
@@ -46,12 +45,19 @@ void initialize(Game *game)
     memcpy32(&tile_mem[0][4], tilesTiles, tilesTilesLen / 4);
     memcpy32(pal_bg_mem, tilesPal, tilesPalLen / 4);
     memcpy32(&tile_mem[4][1], blockTiles, blockTilesLen / 4);
+    memcpy32(&tile_mem[4][13], blockpersonTiles, blockpersonTilesLen / 4);
     memcpy32(pal_obj_mem, blockPal, blockPalLen / 4);
+
+    obj_set_attr(&obj_buffer[0],
+                 ATTR0_SQUARE | ATTR0_4BPP | 0,
+                 ATTR1_SIZE_16x16 | 0,
+                 ATTR2_PALBANK(0) | 13);
+    game->player.oam = &obj_buffer[0];
 
     draw_tilemap(game);
 
     // Initialize block OAM entries
-    for (int i = 0; i < NUM_BLOCKS; i++)
+    for (int i = 1; i <= NUM_BLOCKS; i++)
     {
         obj_set_attr(&obj_buffer[i],
                      ATTR0_SQUARE | ATTR0_4BPP | 0, // y pos
@@ -80,21 +86,23 @@ _Noreturn void play(Game *game)
         vid_vsync();
         REG_BG0HOFS = camera->x;
         REG_BG0VOFS = camera->y;
-        oam_copy(oam_mem, obj_buffer, game->num_blocks);
+        oam_copy(oam_mem, obj_buffer, game->num_blocks + 1);
 
         update_tilemap(game);
 
         // Key presses
         key_poll();
-        camera->x += key_tri_horz() * GAME_SPEED;
-        if (camera->x < 0) camera->x = 0;
-        if (camera->x > level->w * 16 - SCREEN_WIDTH)
-            camera->x = level->w * 16 - SCREEN_WIDTH;
-        camera->y += key_tri_vert() * GAME_SPEED;
-        if (camera->y < 0) camera->y = 0;
-        if (camera->y > level->h * 16 - SCREEN_HEIGHT)
-            camera->y = level->h * 16 - SCREEN_HEIGHT;
+
+        // Update camera
+        int x = game->player.x - SCREEN_WIDTH / 2;
+        int y = game->player.y;
+        int right_edge = level->w * TILE_SIZE - SCREEN_WIDTH;
+        int cam_x = x > right_edge ? right_edge : x;
+        if (cam_x < 0) cam_x = 0;
+        if (camera->x > cam_x) camera->x--;
+        if (camera->x < cam_x) camera->x++;
 
         draw_blocks(obj_buffer, game);
+        move_player(game);
     };
 }
