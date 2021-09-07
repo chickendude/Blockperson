@@ -34,8 +34,21 @@ check_keys(Player *player, const Level *level, Block *blocks, int num_blocks);
  *
  * @return true = Something is blocking the player, false = The tile is open
  */
-bool check_collision(int map_x, int map_y, const Level *level, Block *blocks,
-                     int num_blocks);
+bool is_blocked(int map_x, int map_y, const Level *level, Block *blocks,
+                int num_blocks);
+
+/**
+ * Checks if the tile beneath the player is empty or not.
+ *
+ * Basically checks if the player should fall or not.
+ *
+ * @param player Main Player object.
+ * @param level Current level data.
+ * @param blocks Array of block objects.
+ * @param num_blocks Number of blocks in the level.
+ */
+void check_falling(Player *player, const Level *level, Block *blocks,
+                   int num_blocks);
 
 /**
  * Updates the player's sprite.
@@ -58,6 +71,7 @@ void move_player(Game *game)
     if (player->animation_frames == 0)
     {
         check_keys(player, level, game->blocks, game->num_blocks);
+        check_falling(player, level, game->blocks, game->num_blocks);
     } else
     {
         update_animation(player);
@@ -80,26 +94,32 @@ check_keys(Player *player, const Level *level, Block *blocks, int num_blocks)
     map_y = player->y >> 4;
 
     // Check key presses
-    if (key_is_down(KEY_LEFT) &&
-        !check_collision(map_x - 1, map_y, level, blocks, num_blocks))
+    if (key_is_down(KEY_LEFT))
     {
-        player->dx = -GAME_SPEED;
+        if (!is_blocked(map_x - 1, map_y, level, blocks, num_blocks))
+        {
+            player->dx = -GAME_SPEED;
+            player->animation_frames = 8;
+        }
         player->direction = -1;
-        player->animation_frames = 8;
         player->oam->attr1 &= ~ATTR1_HFLIP;
-    } else if (key_is_down(KEY_RIGHT) &&
-               !check_collision(map_x + 1, map_y, level, blocks, num_blocks))
+    } else if (key_is_down(KEY_RIGHT))
     {
-        player->dx = GAME_SPEED;
+        if (!is_blocked(map_x + 1, map_y, level, blocks, num_blocks))
+        {
+            player->dx = GAME_SPEED;
+            player->animation_frames = 8;
+        }
         player->direction = 1;
-        player->animation_frames = 8;
         player->oam->attr1 |= ATTR1_HFLIP;
     } else if (key_is_down(KEY_UP))
     {
         // Only jump if the tile to the left is blocked but the tile above it
         // is not blocked
-        if (check_collision(map_x - 1, map_y, level, blocks, num_blocks) &&
-            !check_collision(map_x - 1, map_y - 1, level, blocks, num_blocks))
+        if (is_blocked(map_x + player->direction, map_y, level, blocks,
+                       num_blocks) &&
+            !is_blocked(map_x + player->direction, map_y - 1, level, blocks,
+                        num_blocks))
         {
             player->dy = -GAME_SPEED;
             player->animation_frames = 8;
@@ -108,23 +128,38 @@ check_keys(Player *player, const Level *level, Block *blocks, int num_blocks)
 }
 
 bool
-check_collision(int map_x, int map_y, const Level *level, Block *blocks,
-                int num_blocks)
+is_blocked(int map_x, int map_y, const Level *level, Block *blocks,
+           int num_blocks)
 {
+    // Check if tilemap is passable
     if (level->tilemap[map_y * level->w + map_x] == 'B')
-    {
         return true;
-    }
 
+    // Check if there is a block at this coordinate
     for (int i = 0; i < num_blocks; i++)
     {
-        if (blocks[i].x >> 4 == map_x && blocks[i].y >> 4 == map_y)
+        if (blocks[i].x >> 4 == map_x &&
+            blocks[i].y >> 4 == map_y)
         {
             return true;
         }
     }
 
     return false;
+}
+
+void check_falling(Player *player, const Level *level, Block *blocks,
+                   int num_blocks)
+{
+    int map_x, map_y;
+    map_x = player->x >> 4;
+    map_y = player->y >> 4;
+    if (!is_blocked(map_x, map_y + 1, level, blocks, num_blocks))
+    {
+        player->dy = GAME_SPEED;
+        player->dx = 0;
+        player->animation_frames = 8;
+    }
 }
 
 void update_animation(Player *player)
@@ -139,7 +174,7 @@ void update_animation(Player *player)
     {
         // If dy is not zero, the player was jumping so we need to scoot them
         // over one tile as well.
-        if (player->dy != 0)
+        if (player->dy < 0)
         {
             player->dy = 0;
             player->dx = player->direction * GAME_SPEED;
@@ -147,6 +182,7 @@ void update_animation(Player *player)
         } else
         {
             player->dx = 0;
+            player->dy = 0;
         }
     }
 

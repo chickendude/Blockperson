@@ -7,7 +7,6 @@
 #include "blockperson.h"
 #include "tiles.h"
 
-// TODO: Press up to climb
 // TODO: Fall when nothing underneath
 // TODO: Pick up blocks
 // TODO: Hide offscreen blocks so they don't wrap around
