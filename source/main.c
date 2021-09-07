@@ -8,7 +8,9 @@
 #include "tiles.h"
 
 // TODO: Press up to climb
+// TODO: Fall when nothing underneath
 // TODO: Pick up blocks
+// TODO: Hide offscreen blocks so they don't wrap around
 // TODO: Add second background for parallax scrolling
 // TODO: Update camera to follow player
 
