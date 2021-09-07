@@ -8,6 +8,8 @@ struct Player {
     int x, y;
     int dx, dy;
     int animation_frames;
+    /** Left == -1, Right == 1 */
+    int direction;
     OBJ_ATTR *oam;
 };
 
