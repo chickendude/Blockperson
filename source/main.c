@@ -61,6 +61,7 @@ void initialize(Game *game)
     // Initialize block OAM entries
     for (int i = 0; i < NUM_BLOCKS; i++)
     {
+        game->blocks[i].on_ground = true;
         obj_set_attr(&obj_buffer[i + 1],
                      ATTR0_SQUARE | ATTR0_4BPP | 0, // y pos
                      ATTR1_SIZE_16x16 | 0, // x pos
@@ -100,7 +101,7 @@ _Noreturn void play(Game *game)
 
         // Update camera
         int x = game->player.x - SCREEN_WIDTH / 2;
-        int y = game->player.y;
+//        int y = game->player.y;
         int right_edge = level->w * TILE_SIZE - SCREEN_WIDTH;
         int cam_x = x > right_edge ? right_edge : x;
         if (cam_x < 0) cam_x = 0;

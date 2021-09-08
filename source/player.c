@@ -4,6 +4,16 @@
 #include "game.h"
 #include "levels.h"
 
+/*
+ * Player States:
+ * - Idle
+ * - Walking
+ * - Lifting block
+ * - Holding block
+ * - Releasing block
+ * - Falling
+ */
+
 // -----------------------------------------------------------------------------
 // Private function declarations
 // -----------------------------------------------------------------------------
@@ -68,7 +78,7 @@ void move_player(Game *game)
     const Level *level = game->cur_level;
 
     // Move player
-    if (player->animation_frames == 0)
+    if (player->animation_frames == 0 && player->state == WALKING)
     {
         check_keys(player, level, game->blocks, game->num_blocks);
         check_falling(player, level, game->blocks, game->num_blocks);
@@ -124,6 +134,16 @@ check_keys(Player *player, const Level *level, Block *blocks, int num_blocks)
             player->dy = -GAME_SPEED;
             player->animation_frames = 8;
         }
+    } else if (player->lifted_block == NULL && key_is_down(KEY_A))
+    {
+        map_x += player->direction;
+        if (get_block(map_x, map_y, blocks, num_blocks) &&
+            !is_blocked(map_x, map_y - 1, level, blocks,
+                        num_blocks)) {
+            player->lifted_block = get_block(map_x, map_y, blocks, num_blocks);
+            player->lifted_block->on_ground = false;
+//            player->state = LIFTING_BLOCK;
+        }
     }
 }
 
@@ -136,16 +156,7 @@ is_blocked(int map_x, int map_y, const Level *level, Block *blocks,
         return true;
 
     // Check if there is a block at this coordinate
-    for (int i = 0; i < num_blocks; i++)
-    {
-        if (blocks[i].x >> 4 == map_x &&
-            blocks[i].y >> 4 == map_y)
-        {
-            return true;
-        }
-    }
-
-    return false;
+    return get_block(map_x, map_y, blocks, num_blocks) != NULL;
 }
 
 void check_falling(Player *player, const Level *level, Block *blocks,
