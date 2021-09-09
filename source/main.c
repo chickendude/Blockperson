@@ -7,11 +7,10 @@
 #include "blockperson.h"
 #include "tiles.h"
 
-// TODO: Fall when nothing underneath
-// TODO: Pick up blocks
+// TODO: Fix animation switch when falling without holding a block
 // TODO: Hide offscreen blocks so they don't wrap around
 // TODO: Add second background for parallax scrolling
-// TODO: Update camera to follow player
+// TODO: Add velocity to camera so that it catches up with player
 
 // Buffer to hold changes to OAM data so that you can update outside of VBLANK.
 // This will be copied over to OAM in VBLANK.
@@ -62,7 +61,7 @@ void initialize(Game *game)
     // Initialize block OAM entries
     for (int i = 0; i < NUM_BLOCKS; i++)
     {
-        game->blocks[i].on_ground = true;
+        game->blocks[i].is_falling = true;
         obj_set_attr(&obj_buffer[i + 1],
                      ATTR0_SQUARE | ATTR0_4BPP | 0, // y pos
                      ATTR1_SIZE_16x16 | 0, // x pos

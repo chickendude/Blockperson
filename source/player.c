@@ -33,23 +33,6 @@ void
 check_keys(Player *player, const Level *level, Block *blocks, int num_blocks);
 
 /**
- * Checks if the tile in the direction the player is facing is walkable.
- *
- * If it is a block or wall, the player's `dx` and `animation_frame` value will
- * be reset to 0.
- *
- * @param map_x The x position in the map to check
- * @param map_y The y position in the map to check
- * @param level Current level data.
- * @param blocks Array of block objects.
- * @param num_blocks Number of blocks in the level.
- *
- * @return true = Something is blocking the player, false = The tile is open
- */
-bool is_blocked(int map_x, int map_y, const Level *level, Block *blocks,
-                int num_blocks);
-
-/**
  * Checks if the tile beneath the player is empty or not.
  *
  * Basically checks if the player should fall or not.
@@ -193,10 +176,10 @@ check_keys(Player *player, const Level *level, Block *blocks, int num_blocks)
         // If the tile in front of the player is a block with nothing above it
         if (get_block(map_x, map_y, blocks, num_blocks) &&
             !is_blocked(map_x, map_y - 1, level, blocks, num_blocks) &&
-            !is_blocked(map_x - player->direction, map_y - 1, level, blocks, num_blocks))
+            !is_blocked(map_x - player->direction, map_y - 1, level, blocks,
+                        num_blocks))
         {
             player->lifted_block = get_block(map_x, map_y, blocks, num_blocks);
-            player->lifted_block->on_ground = false;
             player->state = LIFTING_BLOCK;
         }
     } else if (player->lifted_block != NULL && key_is_down(KEY_A))
@@ -209,18 +192,6 @@ check_keys(Player *player, const Level *level, Block *blocks, int num_blocks)
             player->state = DROPPING_BLOCK;
         }
     }
-}
-
-bool
-is_blocked(int map_x, int map_y, const Level *level, Block *blocks,
-           int num_blocks)
-{
-    // Check if tilemap is passable
-    if (level->tilemap[map_y * level->w + map_x] == 'B')
-        return true;
-
-    // Check if there is a block at this coordinate
-    return get_block(map_x, map_y, blocks, num_blocks) != NULL;
 }
 
 void check_falling(Player *player, const Level *level, Block *blocks,
@@ -298,13 +269,15 @@ void update_dropping_block(Player *player)
 {
     Block *b = player->lifted_block;
 
-    if (b->x != player->x + player->direction * TILE_SIZE)
+    if (b != NULL && b->x != player->x + player->direction * TILE_SIZE)
     {
         b->x += player->direction * GAME_SPEED;
+    } else if (player->animation_frames == 8)
+    {
+        b->is_falling = true;
+        player->lifted_block = NULL;
     } else if (player->animation_frames == 16)
     {
-        b->on_ground = false;
-        player->lifted_block = NULL;
         player->state = IDLE;
     }
 

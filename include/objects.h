@@ -6,7 +6,7 @@
 
 struct Block {
     int x, y;
-    bool on_ground;
+    bool is_falling;
 };
 
 void draw_blocks(OBJ_ATTR *obj_buffer, Game *game);

@@ -27,4 +27,21 @@ void draw_tilemap(Game *game);
  */
 void update_tilemap(Game *game);
 
+/**
+ * Checks if the tile in the direction the player is facing is walkable.
+ *
+ * If it is a block or wall, the player's `dx` and `animation_frame` value will
+ * be reset to 0.
+ *
+ * @param map_x The x position in the map to check
+ * @param map_y The y position in the map to check
+ * @param level Current level data.
+ * @param blocks Array of block objects.
+ * @param num_blocks Number of blocks in the level.
+ *
+ * @return true = Something is blocking the player, false = The tile is open
+ */
+bool is_blocked(int map_x, int map_y, const Level *level, Block *blocks,
+                int num_blocks);
+
 #endif //BLOCKPERSON_GAME_H

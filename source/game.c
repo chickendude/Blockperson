@@ -95,6 +95,18 @@ void update_tilemap(Game *game)
     game->prev_camera = game->camera;
 }
 
+bool
+is_blocked(int map_x, int map_y, const Level *level, Block *blocks,
+           int num_blocks)
+{
+    // Check if tilemap is passable
+    if (level->tilemap[map_y * level->w + map_x] == 'B')
+        return true;
+
+    // Check if there is a block at this coordinate
+    return get_block(map_x, map_y, blocks, num_blocks) != NULL;
+}
+
 // -----------------------------------------------------------------------------
 // Private functions definitions
 // -----------------------------------------------------------------------------
