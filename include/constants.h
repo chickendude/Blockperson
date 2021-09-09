@@ -21,5 +21,4 @@
 
 #define TILE_SIZE 16
 
-#define TILE(n) (1 + (n * 4))
 #endif //BLOCKPERSON_CONSTANTS_H
