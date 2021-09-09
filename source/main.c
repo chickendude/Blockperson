@@ -55,6 +55,7 @@ void initialize(Game *game)
                  ATTR1_SIZE_16x16 | 0,
                  ATTR2_PALBANK(0) | 13);
     game->player.oam = &obj_buffer[0];
+    game->player.direction = -1;
 
     draw_tilemap(game);
 

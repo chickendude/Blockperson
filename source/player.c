@@ -65,7 +65,21 @@ void check_falling(Player *player, const Level *level, Block *blocks,
  *
  * @param player Main Player object
  */
-void update_animation(Player *player);
+void update_walking_animation(Player *player);
+
+void update_lifting_block_animation(Player *player);
+
+void update_jumping_animation(Player *player);
+
+void update_falling_animation(Player *player);
+
+void update_holding_block_walking_animation(Player *player);
+
+void update_holding_block_idle_animation(Player *player);
+
+void update_holding_block_jumping_animation(Player *player);
+
+void update_holding_block_falling_animation(Player *player);
 
 // -----------------------------------------------------------------------------
 // Public function definitions
@@ -78,13 +92,43 @@ void move_player(Game *game)
     const Level *level = game->cur_level;
 
     // Move player
-    if (player->animation_frames == 0 && player->state == WALKING)
+    if (player->state == IDLE || player->state == HOLDING_BLOCK_IDLE)
     {
         check_keys(player, level, game->blocks, game->num_blocks);
         check_falling(player, level, game->blocks, game->num_blocks);
-    } else
+    }
+
+    // Animate and move sprite
+    switch (player->state)
     {
-        update_animation(player);
+        case IDLE:
+            break;
+        case WALKING:
+            update_walking_animation(player);
+            break;
+        case LIFTING_BLOCK:
+            update_lifting_block_animation(player);
+            break;
+        case JUMPING:
+            update_jumping_animation(player);
+            break;
+        case FALLING:
+            update_falling_animation(player);
+            break;
+        case HOLDING_BLOCK_WALKING:
+            update_holding_block_walking_animation(player);
+            break;
+        case HOLDING_BLOCK_IDLE:
+            update_holding_block_idle_animation(player);
+            break;
+        case HOLDING_BLOCK_JUMPING:
+            update_holding_block_jumping_animation(player);
+            break;
+        case HOLDING_BLOCK_FALLING:
+            update_holding_block_falling_animation(player);
+            break;
+        case RELEASING_BLOCK:
+            break;
     }
 
     obj_set_pos(player->oam, player->x - camera->x, player->y - camera->y);
@@ -103,13 +147,15 @@ check_keys(Player *player, const Level *level, Block *blocks, int num_blocks)
     map_x = player->x >> 4;
     map_y = player->y >> 4;
 
+    player->animation_frames = 0;
+
     // Check key presses
     if (key_is_down(KEY_LEFT))
     {
         if (!is_blocked(map_x - 1, map_y, level, blocks, num_blocks))
         {
-            player->dx = -GAME_SPEED;
-            player->animation_frames = 8;
+            player->state =
+                    player->state == IDLE ? WALKING : HOLDING_BLOCK_WALKING;
         }
         player->direction = -1;
         player->oam->attr1 &= ~ATTR1_HFLIP;
@@ -117,8 +163,8 @@ check_keys(Player *player, const Level *level, Block *blocks, int num_blocks)
     {
         if (!is_blocked(map_x + 1, map_y, level, blocks, num_blocks))
         {
-            player->dx = GAME_SPEED;
-            player->animation_frames = 8;
+            player->state =
+                    player->state == IDLE ? WALKING : HOLDING_BLOCK_WALKING;
         }
         player->direction = 1;
         player->oam->attr1 |= ATTR1_HFLIP;
@@ -131,18 +177,20 @@ check_keys(Player *player, const Level *level, Block *blocks, int num_blocks)
             !is_blocked(map_x + player->direction, map_y - 1, level, blocks,
                         num_blocks))
         {
-            player->dy = -GAME_SPEED;
-            player->animation_frames = 8;
+            player->state =
+                    player->state == IDLE ? JUMPING : HOLDING_BLOCK_JUMPING;
         }
     } else if (player->lifted_block == NULL && key_is_down(KEY_A))
     {
         map_x += player->direction;
+        // If the tile in front of the player is a block with nothing above it
         if (get_block(map_x, map_y, blocks, num_blocks) &&
             !is_blocked(map_x, map_y - 1, level, blocks,
-                        num_blocks)) {
+                        num_blocks))
+        {
             player->lifted_block = get_block(map_x, map_y, blocks, num_blocks);
             player->lifted_block->on_ground = false;
-//            player->state = LIFTING_BLOCK;
+            player->state = LIFTING_BLOCK;
         }
     }
 }
@@ -167,37 +215,131 @@ void check_falling(Player *player, const Level *level, Block *blocks,
     map_y = player->y >> 4;
     if (!is_blocked(map_x, map_y + 1, level, blocks, num_blocks))
     {
-        player->dy = GAME_SPEED;
-        player->dx = 0;
-        player->animation_frames = 8;
+        player->animation_frames = 0;
+        player->state = player->state == IDLE ? FALLING : HOLDING_BLOCK_FALLING;
     }
 }
 
-void update_animation(Player *player)
-{
-    player->animation_frames--;
-    player->x += player->dx;
-    player->y += player->dy;
+// Walking
 
-    // If animation frame reached 0 this frame, handle end of animation.
-    // TODO: May want to look into setting up a FSM here
-    if (player->animation_frames == 0)
+void update_walking_base(Player *player, int base_tile, State next_state) {
+    player->animation_frames++;
+
+    player->x += player->direction * GAME_SPEED;
+
+    if (player->animation_frames == 8)
     {
-        // If dy is not zero, the player was jumping so we need to scoot them
-        // over one tile as well.
-        if (player->dy < 0)
-        {
-            player->dy = 0;
-            player->dx = player->direction * GAME_SPEED;
-            player->animation_frames = 8;
-        } else
-        {
-            player->dx = 0;
-            player->dy = 0;
-        }
+        player->state = next_state;
+    } else if (player->animation_frames >= 4) {
+        base_tile +=4;
     }
 
     // Update player's sprite according to animation frame
     player->oam->attr2 &= ~ATTR2_ID_MASK;
-    player->oam->attr2 |= 13 + (player->animation_frames >> 2) * 4;
+    player->oam->attr2 |= base_tile;
+}
+
+void update_walking_animation(Player *player)
+{
+    update_walking_base(player, TILE(3), IDLE);
+}
+
+void update_holding_block_walking_animation(Player *player)
+{
+    update_walking_base(player, TILE(11), HOLDING_BLOCK_IDLE);
+    player->lifted_block->x = player->x;
+    player->lifted_block->y = player->y - TILE_SIZE;
+}
+
+// Lifting block
+
+void update_lifting_block_animation(Player *player)
+{
+    Block *b = player->lifted_block;
+
+    if (b->y != player->y - TILE_SIZE)
+    {
+        b->y -= GAME_SPEED;
+    } else if (b->x != player->x)
+    {
+        b->x -= player->direction * GAME_SPEED;
+    } else
+    {
+        player->state = HOLDING_BLOCK_IDLE;
+    }
+
+    // Update player's sprite according to animation frame
+    player->animation_frames++;
+    player->oam->attr2 &= ~ATTR2_ID_MASK;
+    player->oam->attr2 |= TILE(4) + (player->animation_frames >> 2) * 4;
+}
+
+// Idle
+
+void update_holding_block_idle_animation(Player *player)
+{
+    int frame, t_id;
+
+    // Increase animation frame and strip upper bits out
+    frame = ++player->animation_frames & 0x3F;
+
+    // If the frame is between 0x2A and 0x3F, use tile 12.
+    t_id = frame > 0x2A ? TILE(12) : TILE(11);
+    player->oam->attr2 &= ~ATTR2_ID_MASK;
+    player->oam->attr2 |= t_id;
+}
+
+// Jumping
+
+void update_jumping_base(Player *player, State next_state)
+{
+    player->animation_frames++;
+
+    if (player->animation_frames <= 8)
+    {
+        player->y -= GAME_SPEED;
+    } else if (player->animation_frames <= 16)
+    {
+        player->x += player->direction * GAME_SPEED;
+    } else
+    {
+        player->state = next_state;
+    }
+}
+
+void update_jumping_animation(Player *player)
+{
+    update_jumping_base(player, IDLE);
+}
+
+void update_holding_block_jumping_animation(Player *player)
+{
+    update_jumping_base(player, HOLDING_BLOCK_IDLE);
+    player->lifted_block->x = player->x;
+    player->lifted_block->y = player->y - TILE_SIZE;
+}
+
+// Falling
+
+void update_falling_base(Player *player, State next_state)
+{
+    player->animation_frames++;
+
+    if (player->animation_frames == 8)
+        player->state = next_state;
+
+    player->y += GAME_SPEED;
+
+}
+
+void update_falling_animation(Player *player)
+{
+    update_falling_base(player, IDLE);
+}
+
+void update_holding_block_falling_animation(Player *player)
+{
+    update_falling_base(player, HOLDING_BLOCK_IDLE);
+    player->lifted_block->x = player->x;
+    player->lifted_block->y = player->y - TILE_SIZE;
 }

@@ -11,7 +11,7 @@ const Level level_1 = {20, 10,
                    "B                  B"
                    "B                  B"
                    "B  B        B      B"
-                   "BD B    B O B O M  B"
+                   "BD B    B O B OOM  B"
                    "BBBBBBBBBBBBBBBBBBBB"};
 
 // -----------------------------------------------------------------------------

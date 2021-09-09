@@ -5,9 +5,15 @@
 #include "types.h"
 
 typedef enum State {
+    IDLE,
     WALKING,
+    JUMPING,
+    FALLING,
     LIFTING_BLOCK,
-    HOLDING_BLOCK,
+    HOLDING_BLOCK_IDLE,
+    HOLDING_BLOCK_WALKING,
+    HOLDING_BLOCK_JUMPING,
+    HOLDING_BLOCK_FALLING,
     RELEASING_BLOCK
 } State;
 
