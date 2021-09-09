@@ -6,10 +6,10 @@
 // Constants and macros
 //------------------------------------------------------------------------------
 #define TILE(n) (n * 4)
-#define MOVED_R(x1, x2) x1 > x2 && ((x1 & 0xf) < (x2 & 0xf))
-#define MOVED_L(x1, x2) x1 < x2 && ((x1 & 0xf) > (x2 & 0xf))
-#define MOVED_D(y1, y2) y1 > y2 && ((y1 & 0xf) < (y2 & 0xf))
-#define MOVED_U(y1, y2) y1 < y2 && ((y1 & 0xf) > (y2 & 0xf))
+#define MOVED_R(x1, x2) (x1 > x2 && ((x1 & 0xf) < (x2 & 0xf)))
+#define MOVED_L(x1, x2) (x1 < x2 && ((x1 & 0xf) > (x2 & 0xf)))
+#define MOVED_D(y1, y2) (y1 > y2 && ((y1 & 0xf) < (y2 & 0xf)))
+#define MOVED_U(y1, y2) (y1 < y2 && ((y1 & 0xf) > (y2 & 0xf)))
 
 // -----------------------------------------------------------------------------
 // Private function declarations
