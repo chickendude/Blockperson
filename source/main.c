@@ -8,7 +8,6 @@
 #include "tiles.h"
 
 // TODO: Fix animation switch when falling without holding a block
-// TODO: Hide offscreen blocks so they don't wrap around
 // TODO: Add second background for parallax scrolling
 // TODO: Add velocity to camera so that it catches up with player
 // TODO: Hold button to scroll map without moving player

@@ -12,7 +12,7 @@
 // -----------------------------------------------------------------------------
 void draw_blocks(OBJ_ATTR *obj_buffer, Game *game)
 {
-    int num_blocks, map_x, map_y;
+    int num_blocks, map_x, map_y, b_x, b_y;
     Block *blocks;
     Block *b;
     Camera *cam;
@@ -39,9 +39,14 @@ void draw_blocks(OBJ_ATTR *obj_buffer, Game *game)
             if (b->is_falling) b->y += GAME_SPEED;
         }
         // First object in oam should be the player, hence we add 1.
-        obj_set_pos(&obj_buffer[i + 1],
-                    b->x - cam->x,
-                    b->y - cam->y);
+        b_x = b->x - cam->x;
+        b_y = b->y - cam->y;
+        if (b_x < -TILE_SIZE || b_x > SCREEN_WIDTH ||
+            b_y < -TILE_SIZE || b_y > SCREEN_HEIGHT)
+        {
+            b_x = b_y = SCREEN_WIDTH;
+        }
+        obj_set_pos(&obj_buffer[i + 1], b_x, b_y);
     }
 }
 
