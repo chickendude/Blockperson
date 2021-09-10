@@ -10,4 +10,4 @@ include_directories($ENV{DEVKITPRO}/libtonc/include/)
 include_directories($ENV{DEVKITARM}/arm-none-eabi/include)
 include_directories(include gfx)
 
-add_executable(blockperson source/main.c source/levels.c source/objects.c source/game.c include/player.h source/player.c)
+add_executable(blockperson source/main.c source/levels.c source/objects.c source/game.c include/player.h source/player.c source/camera.c)

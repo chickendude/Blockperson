@@ -9,7 +9,7 @@
 
 // TODO: Fix animation switch when falling without holding a block
 // TODO: Add second background for parallax scrolling
-// TODO: Add velocity to camera so that it catches up with player
+// TODO: Add vertical scrolling to camera
 // TODO: Hold button to scroll map without moving player
 
 // Buffer to hold changes to OAM data so that you can update outside of VBLANK.
@@ -77,16 +77,14 @@ void initialize(Game *game)
 void play(Game *game)
 {
     Camera *camera;
-    const Level *level;
 
-    while (game->level_id < 2)
+    while (game->level_id < NUM_LEVELS)
     {
         load_next_level(game);
         draw_tilemap(game);
         draw_blocks(obj_buffer, game);
 
         camera = &game->camera;
-        level = game->cur_level;
 
         while (!reached_door(game))
         {
@@ -104,13 +102,7 @@ void play(Game *game)
             key_poll();
 
             // Update camera
-            int x = game->player.x - SCREEN_WIDTH / 2;
-//        int y = game->player.y;
-            int right_edge = level->w * TILE_SIZE - SCREEN_WIDTH;
-            int cam_x = x > right_edge ? right_edge : x;
-            if (cam_x < 0) cam_x = 0;
-            if (camera->x > cam_x) camera->x--;
-            if (camera->x < cam_x) camera->x++;
+            update_camera(game);
 
             draw_blocks(obj_buffer, game);
             move_player(game);
