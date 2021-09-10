@@ -11,6 +11,7 @@
 // TODO: Hide offscreen blocks so they don't wrap around
 // TODO: Add second background for parallax scrolling
 // TODO: Add velocity to camera so that it catches up with player
+// TODO: Hold button to scroll map without moving player
 
 // Buffer to hold changes to OAM data so that you can update outside of VBLANK.
 // This will be copied over to OAM in VBLANK.
@@ -24,7 +25,7 @@ OBJ_ATTR obj_buffer[NUM_SPRITES];
 void initialize(Game *game);
 
 /** Main game loop. */
-_Noreturn void play(Game *game);
+void play(Game *game);
 
 //------------------------------------------------------------------------------
 // Program entry point
@@ -40,8 +41,6 @@ int main(void)
 
 void initialize(Game *game)
 {
-    load_level(game, &level_1);
-
     // Copy tile and palette data
     memcpy32(&tile_mem[0][4], tilesTiles, tilesTilesLen / 4);
     memcpy32(pal_bg_mem, tilesPal, tilesPalLen / 4);
@@ -56,18 +55,15 @@ void initialize(Game *game)
     game->player.oam = &obj_buffer[0];
     game->player.direction = -1;
 
-    draw_tilemap(game);
-
     // Initialize block OAM entries
     for (int i = 0; i < NUM_BLOCKS; i++)
     {
-        game->blocks[i].is_falling = true;
+        game->blocks[i].is_falling = false;
         obj_set_attr(&obj_buffer[i + 1],
                      ATTR0_SQUARE | ATTR0_4BPP | 0, // y pos
                      ATTR1_SIZE_16x16 | 0, // x pos
                      ATTR2_PALBANK(0) | 5); // tile id
     }
-    draw_blocks(obj_buffer, game);
 
     // Enable Mode 0: 4 bgs available, but none can be rotated
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ | DCNT_OBJ_1D;
@@ -79,36 +75,46 @@ void initialize(Game *game)
     REG_BG0VOFS = game->camera.y;
 }
 
-_Noreturn void play(Game *game)
+void play(Game *game)
 {
-    Camera *camera = &game->camera;
-    const Level *level = game->cur_level;
+    Camera *camera;
+    const Level *level;
 
-    while (1)
+    while (game->level_id < 2)
     {
-        vid_vsync();
-        REG_BG0HOFS = camera->x;
-        REG_BG0VOFS = camera->y;
-
-        // Copy buffer data to oam_mem, only sprites are the blocks and the
-        // player, hence the +1 (for the player's sprite).
-        oam_copy(oam_mem, obj_buffer, game->num_blocks + 1);
-
-        update_tilemap(game);
-
-        // Key presses
-        key_poll();
-
-        // Update camera
-        int x = game->player.x - SCREEN_WIDTH / 2;
-//        int y = game->player.y;
-        int right_edge = level->w * TILE_SIZE - SCREEN_WIDTH;
-        int cam_x = x > right_edge ? right_edge : x;
-        if (cam_x < 0) cam_x = 0;
-        if (camera->x > cam_x) camera->x--;
-        if (camera->x < cam_x) camera->x++;
-
+        load_next_level(game);
+        draw_tilemap(game);
         draw_blocks(obj_buffer, game);
-        move_player(game);
-    };
+
+        camera = &game->camera;
+        level = game->cur_level;
+
+        while (!reached_door(game))
+        {
+            vid_vsync();
+            REG_BG0HOFS = camera->x;
+            REG_BG0VOFS = camera->y;
+
+            // Copy buffer data to oam_mem, only sprites are the blocks and the
+            // player, hence the +1 (for the player's sprite).
+            oam_copy(oam_mem, obj_buffer, game->num_blocks + 1);
+
+            update_tilemap(game);
+
+            // Key presses
+            key_poll();
+
+            // Update camera
+            int x = game->player.x - SCREEN_WIDTH / 2;
+//        int y = game->player.y;
+            int right_edge = level->w * TILE_SIZE - SCREEN_WIDTH;
+            int cam_x = x > right_edge ? right_edge : x;
+            if (cam_x < 0) cam_x = 0;
+            if (camera->x > cam_x) camera->x--;
+            if (camera->x < cam_x) camera->x++;
+
+            draw_blocks(obj_buffer, game);
+            move_player(game);
+        }
+    }
 }

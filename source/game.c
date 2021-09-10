@@ -107,6 +107,18 @@ is_blocked(int map_x, int map_y, const Level *level, Block *blocks,
     return get_block(map_x, map_y, blocks, num_blocks) != NULL;
 }
 
+bool reached_door(Game *game)
+{
+    int map_x, map_y, map_w;
+    Player *player = &game->player;
+    char *map = game->cur_level->tilemap;
+
+    map_x = player->x / TILE_SIZE;
+    map_y = player->y / TILE_SIZE;
+    map_w = game->cur_level->w;
+    return map[map_y * map_w + map_x] == 'D';
+}
+
 // -----------------------------------------------------------------------------
 // Private functions definitions
 // -----------------------------------------------------------------------------

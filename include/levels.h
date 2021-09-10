@@ -11,8 +11,10 @@ struct Level
     char *tilemap;
 };
 
-void load_level(Game *game, const Level *level);
+void load_next_level(Game *game);
 
-extern const Level level_1;
+extern const Level *levels[5];
+
+extern const Level level_1, level_2, level_3, level_4, level_5;
 
 #endif //BLOCKPERSON_LEVELS_H

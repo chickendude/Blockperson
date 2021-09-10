@@ -10,6 +10,7 @@ struct Game {
     Camera camera;
     Camera prev_camera;
     Player player;
+    int level_id;
     const Level *cur_level;
     int num_blocks;
     Block blocks[50];
@@ -43,5 +44,13 @@ void update_tilemap(Game *game);
  */
 bool is_blocked(int map_x, int map_y, const Level *level, Block *blocks,
                 int num_blocks);
+
+/**
+ * Checks if player has reached a door tile.
+ *
+ * @param game Main Game object.
+ * @return true = yes, false = no
+ */
+bool reached_door(Game *game);
 
 #endif //BLOCKPERSON_GAME_H
