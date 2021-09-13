@@ -1,7 +1,7 @@
 #include "levels.h"
 #include "game.h"
 
-const Level *levels[5] = {&level_2, &level_2, &level_3, &level_4, &level_5};
+const Level *levels[5] = {&level_1, &level_2, &level_3, &level_4, &level_5};
 
 const Level level_1 = {20, 10,
                        64, 0,

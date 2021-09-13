@@ -14,25 +14,41 @@
 
 void update_camera(Game *game)
 {
-    int cam_x, right_edge, difference_x;
+    int cam_x, cam_y, edge, difference;
     const Level *level = game->cur_level;
     Camera *camera = &game->camera;
     Player *player = &game->player;
 
     // Handle camera's x coordinates
     cam_x = player->x - SCREEN_WIDTH / 2;
-    right_edge = level->w * TILE_SIZE - SCREEN_WIDTH;
+    edge = level->w * TILE_SIZE - SCREEN_WIDTH;
 
     // Limit camera so it doesn't go beyond edges
-    cam_x = cam_x > right_edge ? right_edge : cam_x;
+    cam_x = cam_x > edge ? edge : cam_x;
     cam_x = cam_x < 0 ? 0 : cam_x;
-    difference_x = camera->x - cam_x;
-    if (difference_x < 0)
+    difference = camera->x - cam_x;
+    if (difference < 0)
     {
-        camera->x += (-difference_x >> 3) + 1;
-    } else if (difference_x > 0)
+        camera->x += (-difference >> 3) + 1;
+    } else if (difference > 0)
     {
-        camera->x -= (difference_x >> 3) + 1;
+        camera->x -= (difference >> 3) + 1;
+    }
+
+    // Handle camera's y coordinates
+    cam_y = player->y - SCREEN_HEIGHT / 2;
+    edge = level->h * TILE_SIZE - SCREEN_HEIGHT;
+
+    // Limit camera so it doesn't go beyond edges
+    cam_y = cam_y > edge ? edge : cam_y;
+    cam_y = cam_y < 0 ? 0 : cam_y;
+    difference = camera->y - cam_y;
+    if (difference < 0)
+    {
+        camera->y += (-difference >> 3) + 1;
+    } else if (difference > 0)
+    {
+        camera->y -= (difference >> 3) + 1;
     }
 }
 
