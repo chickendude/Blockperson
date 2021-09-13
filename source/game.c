@@ -49,6 +49,23 @@ void draw_tilemap(Game *game)
                 case 'D':
                     draw_tile(x, y, TILE(2));
                     break;
+            }
+        }
+    }
+}
+
+void extract_tilemap(Game *game)
+{
+    const Level *level = game->cur_level;
+    const char *map = game->cur_level->tilemap;
+
+
+    for (int x = 0; x < level->w; x++)
+    {
+        for (int y = 0; y < level->h; y++)
+        {
+            switch (map[y * level->w + x])
+            {
                 case 'O':
                     game->blocks[game->num_blocks].x = x * TILE_SIZE;
                     game->blocks[game->num_blocks].y = y * TILE_SIZE;

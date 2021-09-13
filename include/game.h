@@ -22,9 +22,18 @@ struct Game {
 void draw_tilemap(Game *game);
 
 /**
+ * Extracts blocks and player position from the tilemap.
+ *
+ * Since we only parse part of the tilemap when drawing it for the first time
+ * in `draw_tilemap`, we need to do a full pass of the tilemap to extract the
+ * blocks and the player's position.
+ */
+void extract_tilemap(Game *game);
+
+/**
  * Only updates the parts of the map that are going off screen.
  *
- * @param game The main game object containing
+ * @param game The main game object
  */
 void update_tilemap(Game *game);
 

@@ -1,7 +1,7 @@
 #include "levels.h"
 #include "game.h"
 
-const Level *levels[5] = {&level_1, &level_2, &level_3, &level_4, &level_5};
+const Level *levels[5] = {&level_2, &level_2, &level_3, &level_4, &level_5};
 
 const Level level_1 = {20, 10,
                        64, 0,
@@ -23,10 +23,10 @@ const Level level_2 = {22, 10,
                        "BB                 B  "
                        "BD                  B "
                        "BB                   B"
-                       " B           B  O    B"
-                       " B           BO OOM  B"
+                       " BO          B  O    B"
+                       " BOO         BO OOM  B"
                        " BBBBB   BBBBBBBBBBBBB"
-                       "     B  OB            "
+                       "     BO OB            "
                        "     BBBBB            "};
 
 const Level level_3 = {19, 11,
@@ -95,6 +95,8 @@ void load_next_level(Game *game)
     game->camera.y = level->start_y;
     game->player.animation_frames = 0;
     game->player.state = IDLE;
+
+    extract_tilemap(game);
 }
 
 

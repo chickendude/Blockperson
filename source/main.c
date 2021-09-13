@@ -7,7 +7,6 @@
 #include "blockperson.h"
 #include "tiles.h"
 
-// TODO: Fix animation switch when falling without holding a block
 // TODO: Add second background for parallax scrolling
 // TODO: Add vertical scrolling to camera
 // TODO: Hold button to scroll map without moving player
