@@ -203,7 +203,8 @@ void check_falling(Player *player, const Level *level, Block *blocks,
     if (!is_blocked(map_x, map_y + 1, level, blocks, num_blocks))
     {
         player->animation_frames = 0;
-        player->state = player->state == IDLE ? FALLING : HOLDING_BLOCK_FALLING;
+        player->state = (player->state == IDLE || player->state == WALKING)
+                        ? FALLING : HOLDING_BLOCK_FALLING;
     }
 }
 
