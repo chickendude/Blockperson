@@ -3,6 +3,7 @@
 #include "game.h"
 #include "levels.h"
 // Sprite data
+#include "background.h"
 #include "block.h"
 #include "blockperson.h"
 #include "tiles.h"
@@ -40,6 +41,7 @@ void initialize(Game *game)
 {
     // Copy tile and palette data
     memcpy32(&tile_mem[0][4], tilesTiles, tilesTilesLen / 4);
+    memcpy32(&tile_mem[0][12], backgroundTiles, backgroundTilesLen / 4);
     memcpy32(pal_bg_mem, tilesPal, tilesPalLen / 4);
     memcpy32(&tile_mem[4][1], blockTiles, blockTilesLen / 4);
     memcpy32(&tile_mem[4][13], blockpersonTiles, blockpersonTilesLen / 4);
@@ -63,13 +65,16 @@ void initialize(Game *game)
     }
 
     // Enable Mode 0: 4 bgs available, but none can be rotated
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ | DCNT_OBJ_1D;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ | DCNT_OBJ_1D;
 
     // Tiles should be at the first character block, maps should be in the last
     // Screen block
-    REG_BG0CNT = BG_CBB(0) | BG_SBB(30) | BG_REG_32x32;
+    REG_BG0CNT = BG_CBB(0) | BG_SBB(30) | BG_REG_32x32 | BG_PRIO(0);
     REG_BG0HOFS = game->camera.x;
     REG_BG0VOFS = game->camera.y;
+
+    REG_BG1CNT = BG_CBB(0) | BG_SBB(28) | BG_REG_64x32 | BG_PRIO(1);
+    draw_bg_tilemap();
 }
 
 void play(Game *game)
@@ -89,8 +94,13 @@ void play(Game *game)
         while (!reached_door(game))
         {
             vid_vsync();
+            // Foreground
             REG_BG0HOFS = camera->x;
             REG_BG0VOFS = camera->y;
+
+            // Background (parallax scrolling)
+            REG_BG1HOFS = camera->x >> 3;
+            REG_BG1VOFS = camera->y >> 3;
 
             // Copy buffer data to oam_mem, only sprites are the blocks and the
             // player, hence the +1 (for the player's sprite).
@@ -106,7 +116,8 @@ void play(Game *game)
 
             draw_blocks(obj_buffer, game);
             move_player(game);
-            obj_set_pos(player->oam, player->x - camera->x, player->y - camera->y);
+            obj_set_pos(player->oam, player->x - camera->x,
+                        player->y - camera->y);
         }
     }
 }

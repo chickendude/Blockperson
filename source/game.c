@@ -1,6 +1,8 @@
 #include "game.h"
 #include "constants.h"
 #include "levels.h"
+// Tile data
+#include "bg.h"
 
 //------------------------------------------------------------------------------
 // Constants and macros
@@ -50,6 +52,29 @@ void draw_tilemap(Game *game)
                     draw_tile(x, y, TILE(2));
                     break;
             }
+        }
+    }
+}
+
+void draw_bg_tilemap() {
+    unsigned char tile_id = 22;
+    for (int i = 0; i < 32; i++)
+    {
+        for (int j = 0; j < 16; j++)
+        {
+            tile_id = bgMap[j * 32 + i] * 4 + 12;
+            int sbb = 28;
+            int x = i * 2;
+            int y = j * 2;
+            if (x >= 32)
+            {
+                sbb++;
+                x -= 32;
+            }
+            se_mem[sbb][y * NUM_TILES_IN_ROW + x] = tile_id;
+            se_mem[sbb][y * NUM_TILES_IN_ROW + x + 1] = tile_id + 1;
+            se_mem[sbb][(y + 1) * NUM_TILES_IN_ROW + x] = tile_id + 2;
+            se_mem[sbb][(y + 1) * NUM_TILES_IN_ROW + x + 1] = tile_id + 3;
         }
     }
 }

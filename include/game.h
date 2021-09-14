@@ -6,7 +6,8 @@
 #include "objects.h"
 #include "player.h"
 
-struct Game {
+struct Game
+{
     Camera camera;
     Camera prev_camera;
     Player player;
@@ -20,6 +21,11 @@ struct Game {
  * Draws the entire map to the screen based on the current camera coordinates.
  */
 void draw_tilemap(Game *game);
+
+/**
+ * Draws the background tilemap to the screen.
+ */
+void draw_bg_tilemap();
 
 /**
  * Extracts blocks and player position from the tilemap.

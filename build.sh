@@ -26,6 +26,7 @@ done
 # Start building
 cd gfx || exit
 clear
+#grit background.png -gt -gB4 -Mw 2 -Mh 2
 #grit tiles.png -gt -gB4 -Mw 2 -Mh 2
 #grit block.png -gt -gB4 -Mw 2 -Mh 2
 cd ..
