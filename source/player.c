@@ -78,6 +78,10 @@ void move_player(Game *game)
     Camera *camera = &game->camera;
     const Level *level = game->cur_level;
 
+    // If B is pressed, don't move the player as we're going to be controlling
+    // the camera instead
+    if (key_is_down(KEY_B)) return;
+
     // Move player
     if (player->state == IDLE || player->state == HOLDING_BLOCK_IDLE)
     {
@@ -121,7 +125,6 @@ void move_player(Game *game)
             break;
     }
 
-    obj_set_pos(player->oam, player->x - camera->x, player->y - camera->y);
 }
 
 // -----------------------------------------------------------------------------

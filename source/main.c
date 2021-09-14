@@ -8,8 +8,7 @@
 #include "tiles.h"
 
 // TODO: Add second background for parallax scrolling
-// TODO: Add vertical scrolling to camera
-// TODO: Hold button to scroll map without moving player
+// TODO: Add pause/restart screen
 
 // Buffer to hold changes to OAM data so that you can update outside of VBLANK.
 // This will be copied over to OAM in VBLANK.
@@ -76,6 +75,7 @@ void initialize(Game *game)
 void play(Game *game)
 {
     Camera *camera;
+    Player *player;
 
     while (game->level_id < NUM_LEVELS)
     {
@@ -84,6 +84,7 @@ void play(Game *game)
         draw_blocks(obj_buffer, game);
 
         camera = &game->camera;
+        player = &game->player;
 
         while (!reached_door(game))
         {
@@ -105,6 +106,7 @@ void play(Game *game)
 
             draw_blocks(obj_buffer, game);
             move_player(game);
+            obj_set_pos(player->oam, player->x - camera->x, player->y - camera->y);
         }
     }
 }

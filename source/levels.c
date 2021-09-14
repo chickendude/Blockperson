@@ -23,10 +23,10 @@ const Level level_2 = {22, 10,
                        "BB                 B  "
                        "BD                  B "
                        "BB                   B"
-                       " BO          B  O    B"
-                       " BOO         BO OOM  B"
+                       " B           B  O    B"
+                       " B           BO OOM  B"
                        " BBBBB   BBBBBBBBBBBBB"
-                       "     BO OB            "
+                       "     B  OB            "
                        "     BBBBB            "};
 
 const Level level_3 = {19, 11,
