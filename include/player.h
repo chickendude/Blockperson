@@ -29,6 +29,6 @@ struct Player {
     OBJ_ATTR *oam;
 };
 
-void move_player(Game *game);
+void move_player(Game *game, int *moves);
 
 #endif //BLOCKPERSON_PLAYER_H

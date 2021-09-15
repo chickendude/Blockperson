@@ -140,7 +140,7 @@ void play(Game *game)
             update_camera(game);
 
             draw_blocks(obj_buffer, game);
-            move_player(game);
+            move_player(game, NULL);
             obj_set_pos(player->oam, player->x - camera->x,
                         player->y - camera->y);
         }
