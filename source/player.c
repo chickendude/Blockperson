@@ -148,7 +148,11 @@ check_keys(Player *player, const Level *level, Block *blocks, int num_blocks)
     // Handle auto actions
     int auto_action = AUTO != NULL ? AUTO++[0] : 0;
     // Quit if it's the last action
-    if (auto_action < 0) {AUTO = NULL; return;}
+    if (auto_action < 0)
+    {
+        AUTO = NULL;
+        return;
+    }
 
     // Convert player's coordinates into map coordinates by dividing by 16
     map_x = player->x >> 4;
@@ -161,8 +165,14 @@ check_keys(Player *player, const Level *level, Block *blocks, int num_blocks)
     {
         if (!is_blocked(map_x - 1, map_y, level, blocks, num_blocks))
         {
-            player->state =
-                    player->state == IDLE ? WALKING : HOLDING_BLOCK_WALKING;
+            // If player is holding a block, we also need to check the tile
+            // above them
+            if (player->state != HOLDING_BLOCK_IDLE ||
+                !is_blocked(map_x - 1, map_y - 1, level, blocks, num_blocks))
+            {
+                player->state =
+                        player->state == IDLE ? WALKING : HOLDING_BLOCK_WALKING;
+            }
         }
         player->direction = -1;
         player->oam->attr1 &= ~ATTR1_HFLIP;
@@ -171,8 +181,14 @@ check_keys(Player *player, const Level *level, Block *blocks, int num_blocks)
     {
         if (!is_blocked(map_x + 1, map_y, level, blocks, num_blocks))
         {
-            player->state =
-                    player->state == IDLE ? WALKING : HOLDING_BLOCK_WALKING;
+            // If player is holding a block, we also need to check the tile
+            // above them
+            if (player->state != HOLDING_BLOCK_IDLE ||
+                !is_blocked(map_x + 1, map_y - 1, level, blocks, num_blocks))
+            {
+                player->state =
+                        player->state == IDLE ? WALKING : HOLDING_BLOCK_WALKING;
+            }
         }
         player->direction = 1;
         player->oam->attr1 |= ATTR1_HFLIP;
