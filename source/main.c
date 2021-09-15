@@ -37,7 +37,7 @@ int main(void)
 {
     Game game;
     initialize(&game);
-    show_titlescreen(&game);
+    show_titlescreen(&game, obj_buffer);
     play(&game);
     return 0;
 }
@@ -110,7 +110,11 @@ void play(Game *game)
         camera = &game->camera;
         player = &game->player;
 
-        while (!reached_door(game))
+        // Check for KEY_SELECT
+        // Without this, the keys never get updated after pressing [select]
+        key_poll();
+
+        while (!reached_door(game) && !key_released(KEY_SELECT))
         {
             vid_vsync();
             // Foreground
