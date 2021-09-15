@@ -84,7 +84,6 @@ void extract_tilemap(Game *game)
     const Level *level = game->cur_level;
     const char *map = game->cur_level->tilemap;
 
-
     for (int x = 0; x < level->w; x++)
     {
         for (int y = 0; y < level->h; y++)

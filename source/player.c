@@ -16,6 +16,8 @@
 
 #define TILE(n) (1 + (n * 4))
 
+static int *AUTO;
+
 // -----------------------------------------------------------------------------
 // Private function declarations
 // -----------------------------------------------------------------------------
@@ -72,10 +74,15 @@ void update_holding_block_falling(Player *player);
 // Public function definitions
 // -----------------------------------------------------------------------------
 
+void load_moves(int *moves)
+{
+    // Load the list of moves (if there are any)
+    AUTO = moves;
+}
+
 void move_player(Game *game)
 {
     Player *player = &game->player;
-    Camera *camera = &game->camera;
     const Level *level = game->cur_level;
 
     // If B is pressed, don't move the player as we're going to be controlling
@@ -93,6 +100,8 @@ void move_player(Game *game)
     switch (player->state)
     {
         case IDLE:
+            player->oam->attr2 &= ~ATTR2_ID_MASK;
+            player->oam->attr2 |= TILE(3);
             break;
         case WALKING:
             update_walking(player);
@@ -136,6 +145,11 @@ check_keys(Player *player, const Level *level, Block *blocks, int num_blocks)
 {
     int map_x, map_y;
 
+    // Handle auto actions
+    int auto_action = AUTO != NULL ? AUTO++[0] : 0;
+    // Quit if it's the last action
+    if (auto_action < 0) {AUTO = NULL; return;}
+
     // Convert player's coordinates into map coordinates by dividing by 16
     map_x = player->x >> 4;
     map_y = player->y >> 4;
@@ -143,7 +157,7 @@ check_keys(Player *player, const Level *level, Block *blocks, int num_blocks)
     player->animation_frames = 0;
 
     // Check key presses
-    if (key_is_down(KEY_LEFT))
+    if (auto_action == KEY_LEFT || (!auto_action && key_is_down(KEY_LEFT)))
     {
         if (!is_blocked(map_x - 1, map_y, level, blocks, num_blocks))
         {
@@ -152,7 +166,8 @@ check_keys(Player *player, const Level *level, Block *blocks, int num_blocks)
         }
         player->direction = -1;
         player->oam->attr1 &= ~ATTR1_HFLIP;
-    } else if (key_is_down(KEY_RIGHT))
+    } else if (auto_action == KEY_RIGHT ||
+               (!auto_action && key_is_down(KEY_RIGHT)))
     {
         if (!is_blocked(map_x + 1, map_y, level, blocks, num_blocks))
         {
@@ -161,7 +176,8 @@ check_keys(Player *player, const Level *level, Block *blocks, int num_blocks)
         }
         player->direction = 1;
         player->oam->attr1 |= ATTR1_HFLIP;
-    } else if (key_is_down(KEY_UP))
+    }
+    if (auto_action == KEY_UP || (!auto_action && key_is_down(KEY_UP)))
     {
         // Only jump if the tile to the left is blocked but the tile above it
         // is not blocked
@@ -173,7 +189,9 @@ check_keys(Player *player, const Level *level, Block *blocks, int num_blocks)
             player->state =
                     player->state == IDLE ? JUMPING : HOLDING_BLOCK_JUMPING;
         }
-    } else if (player->lifted_block == NULL && key_is_down(KEY_A))
+    } else if (player->lifted_block == NULL &&
+               (auto_action == KEY_A ||
+                (!auto_action && key_is_down(KEY_A))))
     {
         map_x += player->direction;
         // If the tile in front of the player is a block with nothing above it
@@ -185,7 +203,9 @@ check_keys(Player *player, const Level *level, Block *blocks, int num_blocks)
             player->lifted_block = get_block(map_x, map_y, blocks, num_blocks);
             player->state = LIFTING_BLOCK;
         }
-    } else if (player->lifted_block != NULL && key_is_down(KEY_A))
+    } else if (player->lifted_block != NULL &&
+               (auto_action == KEY_A ||
+                (!auto_action && key_is_down(KEY_A))))
     {
         map_x += player->direction;
         // If there is nothing blocking the player from dropping the block,

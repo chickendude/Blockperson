@@ -20,7 +20,6 @@ typedef enum State {
 
 struct Player {
     int x, y;
-    int dx, dy;
     int animation_frames;
     /** Left == -1, Right == 1 */
     int direction;
@@ -29,6 +28,8 @@ struct Player {
     OBJ_ATTR *oam;
 };
 
-void move_player(Game *game, int *moves);
+void load_moves(int *moves);
+
+void move_player(Game *game);
 
 #endif //BLOCKPERSON_PLAYER_H

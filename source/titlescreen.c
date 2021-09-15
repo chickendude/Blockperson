@@ -5,13 +5,17 @@
 #include "pause_screen.h"
 #include "title_screen.h"
 
-int MOVES[] = {
-        KEY_L, KEY_A, KEY_L, -1
+int LEVEL_1_MOVES[] = {
+        KEY_LEFT, KEY_A, KEY_LEFT, KEY_A, KEY_UP, KEY_UP, KEY_LEFT, 0, 0, KEY_A,
+        KEY_LEFT, KEY_LEFT, KEY_UP, KEY_LEFT, 0, KEY_LEFT, KEY_LEFT, KEY_A,
+        KEY_UP, KEY_UP, KEY_LEFT, -1
 };
+
 // -----------------------------------------------------------------------------
 // Private function declarations
 // -----------------------------------------------------------------------------
 
+void reset_level(Game *game, OBJ_ATTR *obj_buffer);
 
 // -----------------------------------------------------------------------------
 // Public function definitions
@@ -19,18 +23,19 @@ int MOVES[] = {
 
 void show_titlescreen(Game *game, OBJ_ATTR *obj_buffer)
 {
+    int frames_in_titlescreen;
     Player *player = &game->player;
     Camera *camera = &game->camera;
 
     memcpy32(&tile_mem[1][1], title_screenTiles, title_screenTilesLen / 4);
     REG_DISPCNT |= DCNT_BG2;
 
-    load_next_level(game);
-    draw_tilemap(game);
-    draw_blocks(obj_buffer, game);
+    reset_level(game, obj_buffer);
 
     while (!key_released(KEY_START))
     {
+        frames_in_titlescreen++;
+        if (!(frames_in_titlescreen & 0x1FF)) reset_level(game, obj_buffer);
         vid_vsync();
         // Foreground
         REG_BG0HOFS = camera->x;
@@ -53,12 +58,13 @@ void show_titlescreen(Game *game, OBJ_ATTR *obj_buffer)
         update_camera(game);
 
         draw_blocks(obj_buffer, game);
-        move_player(game, MOVES);
+        move_player(game);
         obj_set_pos(player->oam, player->x - camera->x,
                     player->y - camera->y);
     }
 
     game->level_id = 0;
+    load_moves(NULL);
 
     REG_DISPCNT &= ~DCNT_BG2;
     memcpy32(&tile_mem[1][1], pause_screenTiles, pause_screenTilesLen / 4);
@@ -67,3 +73,9 @@ void show_titlescreen(Game *game, OBJ_ATTR *obj_buffer)
 // -----------------------------------------------------------------------------
 // Private functions definitions
 // -----------------------------------------------------------------------------
+
+void reset_level(Game *game, OBJ_ATTR *obj_buffer) {
+    game->level_id = 0;
+    load_next_level(game, obj_buffer);
+    load_moves(LEVEL_1_MOVES);
+}

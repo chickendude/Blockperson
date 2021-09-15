@@ -103,9 +103,7 @@ void play(Game *game)
 
     while (game->level_id < NUM_LEVELS)
     {
-        load_next_level(game);
-        draw_tilemap(game);
-        draw_blocks(obj_buffer, game);
+        load_next_level(game, obj_buffer);
 
         camera = &game->camera;
         player = &game->player;
@@ -140,7 +138,7 @@ void play(Game *game)
             update_camera(game);
 
             draw_blocks(obj_buffer, game);
-            move_player(game, NULL);
+            move_player(game);
             obj_set_pos(player->oam, player->x - camera->x,
                         player->y - camera->y);
         }
@@ -160,9 +158,7 @@ void pause(Game *game)
         if (key_is_down(KEY_R) && key_is_down(KEY_L))
         {
             game->level_id--;
-            load_next_level(game);
-            draw_tilemap(game);
-            draw_blocks(obj_buffer, game);
+            load_next_level(game, obj_buffer);
             is_paused = false;
         }
     }

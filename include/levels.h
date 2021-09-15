@@ -11,7 +11,7 @@ struct Level
     char *tilemap;
 };
 
-void load_next_level(Game *game);
+void load_next_level(Game *game, OBJ_ATTR *obj_buffer);
 
 extern const Level *levels[5];
 

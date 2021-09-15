@@ -86,7 +86,7 @@ const Level level_5 = {22, 14,
 // -----------------------------------------------------------------------------
 // Public function definitions
 // -----------------------------------------------------------------------------
-void load_next_level(Game *game)
+void load_next_level(Game *game, OBJ_ATTR *obj_buffer)
 {
     const Level *level = levels[game->level_id++];
     game->num_blocks = 0;
@@ -95,8 +95,18 @@ void load_next_level(Game *game)
     game->camera.y = level->start_y;
     game->player.animation_frames = 0;
     game->player.state = IDLE;
+    game->player.lifted_block = NULL;
 
     extract_tilemap(game);
+    vid_vsync();
+    draw_tilemap(game);
+    draw_blocks(obj_buffer, game);
+    REG_BG0HOFS = game->camera.x;
+    REG_BG0VOFS = game->camera.y;
+
+    // Background (parallax scrolling)
+    REG_BG1HOFS = game->camera.x >> 3;
+    REG_BG1VOFS = game->camera.y >> 3;
 }
 
 
