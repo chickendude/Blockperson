@@ -2,6 +2,7 @@
 #include "constants.h"
 #include "game.h"
 #include "levels.h"
+#include "titlescreen.h"
 // Sprite data
 #include "background.h"
 #include "block.h"
@@ -36,6 +37,7 @@ int main(void)
 {
     Game game;
     initialize(&game);
+    show_titlescreen(&game);
     play(&game);
     return 0;
 }
@@ -45,7 +47,9 @@ void initialize(Game *game)
     // Copy tile and palette data
     memcpy32(&tile_mem[0][4], tilesTiles, tilesTilesLen / 4);
     memcpy32(&tile_mem[0][12], backgroundTiles, backgroundTilesLen / 4);
-    memcpy32(&tile_mem[1][1], pause_screenTiles, pause_screenTilesLen / 4);
+    // Pause screen tiles are loaded after titlescreen is shown because they
+    // share the same tilemap data
+//    memcpy32(&tile_mem[1][1], pause_screenTiles, pause_screenTilesLen / 4);
     memcpy32(pal_bg_mem, tilesPal, tilesPalLen / 4);
     memcpy32(&tile_mem[4][1], blockTiles, blockTilesLen / 4);
     memcpy32(&tile_mem[4][13], blockpersonTiles, blockpersonTilesLen / 4);
@@ -81,6 +85,7 @@ void initialize(Game *game)
     draw_bg_tilemap();
 
     REG_BG2CNT = BG_CBB(1) | BG_SBB(27) | BG_REG_32x32 | BG_PRIO(0);
+    // Load tilemap data used for the title and pause screens
     int tile_id = 1;
     for (int j = 5; j < 13; j++)
     {
@@ -143,11 +148,13 @@ void pause(Game *game)
     REG_DISPCNT |= DCNT_BG2;
 
     bool is_paused = true;
-    while(is_paused) {
+    while (is_paused)
+    {
         vid_vsync();
         key_poll();
         is_paused = !key_is_down(KEY_B);
-        if (key_is_down(KEY_R) && key_is_down(KEY_L)) {
+        if (key_is_down(KEY_R) && key_is_down(KEY_L))
+        {
             game->level_id--;
             load_next_level(game);
             draw_tilemap(game);
