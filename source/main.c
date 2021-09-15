@@ -7,8 +7,9 @@
 #include "block.h"
 #include "blockperson.h"
 #include "tiles.h"
+// Bitmap data
+#include "pause_screen.h"
 
-// TODO: Add second background for parallax scrolling
 // TODO: Add pause/restart screen
 
 // Buffer to hold changes to OAM data so that you can update outside of VBLANK.
@@ -24,6 +25,8 @@ void initialize(Game *game);
 
 /** Main game loop. */
 void play(Game *game);
+
+void pause(Game *game);
 
 //------------------------------------------------------------------------------
 // Program entry point
@@ -42,6 +45,7 @@ void initialize(Game *game)
     // Copy tile and palette data
     memcpy32(&tile_mem[0][4], tilesTiles, tilesTilesLen / 4);
     memcpy32(&tile_mem[0][12], backgroundTiles, backgroundTilesLen / 4);
+    memcpy32(&tile_mem[1][1], pause_screenTiles, pause_screenTilesLen / 4);
     memcpy32(pal_bg_mem, tilesPal, tilesPalLen / 4);
     memcpy32(&tile_mem[4][1], blockTiles, blockTilesLen / 4);
     memcpy32(&tile_mem[4][13], blockpersonTiles, blockpersonTilesLen / 4);
@@ -50,7 +54,7 @@ void initialize(Game *game)
     obj_set_attr(&obj_buffer[0],
                  ATTR0_SQUARE | ATTR0_4BPP | 0,
                  ATTR1_SIZE_16x16 | 0,
-                 ATTR2_PALBANK(0) | 13);
+                 ATTR2_PRIO(1) | ATTR2_PALBANK(0) | 13);
     game->player.oam = &obj_buffer[0];
     game->player.direction = -1;
 
@@ -61,7 +65,7 @@ void initialize(Game *game)
         obj_set_attr(&obj_buffer[i + 1],
                      ATTR0_SQUARE | ATTR0_4BPP | 0, // y pos
                      ATTR1_SIZE_16x16 | 0, // x pos
-                     ATTR2_PALBANK(0) | 5); // tile id
+                     ATTR2_PRIO(1) | ATTR2_PALBANK(0) | 5); // tile id
     }
 
     // Enable Mode 0: 4 bgs available, but none can be rotated
@@ -69,12 +73,22 @@ void initialize(Game *game)
 
     // Tiles should be at the first character block, maps should be in the last
     // Screen block
-    REG_BG0CNT = BG_CBB(0) | BG_SBB(30) | BG_REG_32x32 | BG_PRIO(0);
+    REG_BG0CNT = BG_CBB(0) | BG_SBB(30) | BG_REG_32x32 | BG_PRIO(1);
     REG_BG0HOFS = game->camera.x;
     REG_BG0VOFS = game->camera.y;
 
-    REG_BG1CNT = BG_CBB(0) | BG_SBB(28) | BG_REG_64x32 | BG_PRIO(1);
+    REG_BG1CNT = BG_CBB(0) | BG_SBB(28) | BG_REG_64x32 | BG_PRIO(2);
     draw_bg_tilemap();
+
+    REG_BG2CNT = BG_CBB(1) | BG_SBB(27) | BG_REG_32x32 | BG_PRIO(0);
+    int tile_id = 1;
+    for (int j = 5; j < 13; j++)
+    {
+        for (int i = 5; i < 25; i++)
+        {
+            se_mem[27][j * 32 + i] = tile_id++;
+        }
+    }
 }
 
 void play(Game *game)
@@ -111,6 +125,8 @@ void play(Game *game)
             // Key presses
             key_poll();
 
+            if (key_is_down(KEY_START)) pause(game);
+
             // Update camera
             update_camera(game);
 
@@ -120,4 +136,25 @@ void play(Game *game)
                         player->y - camera->y);
         }
     }
+}
+
+void pause(Game *game)
+{
+    REG_DISPCNT |= DCNT_BG2;
+
+    bool is_paused = true;
+    while(is_paused) {
+        vid_vsync();
+        key_poll();
+        is_paused = !key_is_down(KEY_B);
+        if (key_is_down(KEY_R) && key_is_down(KEY_L)) {
+            game->level_id--;
+            load_next_level(game);
+            draw_tilemap(game);
+            draw_blocks(obj_buffer, game);
+            is_paused = false;
+        }
+    }
+
+    REG_DISPCNT &= ~DCNT_BG2;
 }
