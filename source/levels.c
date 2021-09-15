@@ -4,7 +4,7 @@
 const Level *levels[5] = {&level_1, &level_2, &level_3, &level_4, &level_5};
 
 const Level level_1 = {20, 10,
-                       64, 0,
+                       80, 0,
                        "                    "
                        "                    "
                        "B                  B"
@@ -17,7 +17,7 @@ const Level level_1 = {20, 10,
                        "BBBBBBBBBBBBBBBBBBBB"};
 
 const Level level_2 = {22, 10,
-                       120, 0,
+                       112, 0,
                        " B    BB        BB    "
                        " B                B   "
                        "BB                 B  "
@@ -30,7 +30,7 @@ const Level level_2 = {22, 10,
                        "     BBBBB            "};
 
 const Level level_3 = {19, 11,
-                       100, 0,
+                       24, 16,
                        " B                 "
                        " B   BBBBBBBBBBBBB "
                        "B B B             B"
@@ -44,7 +44,7 @@ const Level level_3 = {19, 11,
                        "BBB BB   BBB       "};
 
 const Level level_4 = {24, 16,
-                       100, 0,
+                       144, 64,
                        "                  B     "
                        "                 B B    "
                        "       B        B   B   "
@@ -63,7 +63,7 @@ const Level level_4 = {24, 16,
                        "    BBB                 "};
 
 const Level level_5 = {22, 14,
-                       100, 0,
+                       72, 48,
                        "     BBB    BBBBBBBBB "
                        " BBBB   BBBB         B"
                        "B                    B"
