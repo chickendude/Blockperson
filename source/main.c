@@ -8,10 +8,9 @@
 #include "block.h"
 #include "blockperson.h"
 #include "tiles.h"
-// Bitmap data
-#include "pause_screen.h"
 
-// TODO: Add pause/restart screen
+// TODO: Bug carrying block, carried block can go through level bricks
+// TODO: Can walk through blocks when going up
 
 // Buffer to hold changes to OAM data so that you can update outside of VBLANK.
 // This will be copied over to OAM in VBLANK.

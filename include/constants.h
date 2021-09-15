@@ -11,7 +11,7 @@
 #define NUM_BLOCKS 50
 
 /** Number of levels in the game. */
-#define NUM_LEVELS 5
+#define NUM_LEVELS 11
 
 /** Maximum number of sprites that can be drawn on screen. */
 #define NUM_SPRITES (NUM_BLOCKS + 1)
