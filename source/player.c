@@ -144,6 +144,7 @@ void
 check_keys(Player *player, const Level *level, Block *blocks, int num_blocks)
 {
     int map_x, map_y;
+    bool moved = false;
 
     // Handle auto actions
     int auto_action = AUTO != NULL ? AUTO++[0] : 0;
@@ -163,36 +164,31 @@ check_keys(Player *player, const Level *level, Block *blocks, int num_blocks)
     // Check key presses
     if (auto_action == KEY_LEFT || (!auto_action && key_is_down(KEY_LEFT)))
     {
-        if (!is_blocked(map_x - 1, map_y, level, blocks, num_blocks))
-        {
-            // If player is holding a block, we also need to check the tile
-            // above them
-            if (player->state != HOLDING_BLOCK_IDLE ||
-                !is_blocked(map_x - 1, map_y - 1, level, blocks, num_blocks))
-            {
-                player->state =
-                        player->state == IDLE ? WALKING : HOLDING_BLOCK_WALKING;
-            }
-        }
         player->direction = -1;
         player->oam->attr1 &= ~ATTR1_HFLIP;
+        moved = true;
     } else if (auto_action == KEY_RIGHT ||
                (!auto_action && key_is_down(KEY_RIGHT)))
     {
-        if (!is_blocked(map_x + 1, map_y, level, blocks, num_blocks))
-        {
-            // If player is holding a block, we also need to check the tile
-            // above them
-            if (player->state != HOLDING_BLOCK_IDLE ||
-                !is_blocked(map_x + 1, map_y - 1, level, blocks, num_blocks))
-            {
-                player->state =
-                        player->state == IDLE ? WALKING : HOLDING_BLOCK_WALKING;
-            }
-        }
         player->direction = 1;
         player->oam->attr1 |= ATTR1_HFLIP;
+        moved = true;
     }
+
+    if (moved && !is_blocked(map_x + player->direction, map_y, level, blocks,
+                             num_blocks))
+    {
+        // If player is holding a block, we also need to check the tile
+        // above them
+        if (player->state != HOLDING_BLOCK_IDLE ||
+            !is_blocked(map_x + player->direction, map_y - 1, level, blocks,
+                        num_blocks))
+        {
+            player->state =
+                    player->state == IDLE ? WALKING : HOLDING_BLOCK_WALKING;
+        }
+    }
+
     if (auto_action == KEY_UP || (!auto_action && key_is_down(KEY_UP)))
     {
         // Only jump if the tile to the left is blocked but the tile above it
@@ -202,8 +198,28 @@ check_keys(Player *player, const Level *level, Block *blocks, int num_blocks)
             !is_blocked(map_x + player->direction, map_y - 1, level, blocks,
                         num_blocks))
         {
-            player->state =
-                    player->state == IDLE ? JUMPING : HOLDING_BLOCK_JUMPING;
+            // Make sure:
+            // 1. If not holding block, tile above player is free.
+            // 2. If holding block, tiles above the block and to the right are
+            //    free.
+            if ((player->state != HOLDING_BLOCK_IDLE &&
+                 !is_blocked(
+                         map_x,
+                         map_y - 1,
+                         level, blocks, num_blocks)) ||
+                 (player->state == HOLDING_BLOCK_IDLE &&
+                         !is_blocked(
+                         map_x,
+                         map_y - 2,
+                         level, blocks, num_blocks) &&
+                  !is_blocked(
+                          map_x + player->direction,
+                          map_y - 2,
+                          level, blocks, num_blocks)))
+            {
+                player->state =
+                        player->state == IDLE ? JUMPING : HOLDING_BLOCK_JUMPING;
+            }
         }
     } else if (player->lifted_block == NULL &&
                (auto_action == KEY_A ||
