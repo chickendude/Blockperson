@@ -37,7 +37,8 @@ void show_win_screen();
 int main(void)
 {
     Game game;
-    while (1) {
+    while (1)
+    {
         initialize(&game);
         show_titlescreen(&game, obj_buffer);
         play(&game);
@@ -151,14 +152,20 @@ void play(Game *game)
 
 void pause(Game *game)
 {
+    bool is_paused;
+
+    // Turn on BG2, which holds the paused tilemap
     REG_DISPCNT |= DCNT_BG2;
 
-    bool is_paused = true;
+    // Wait for start to be released first before reading any other keys
+    while (key_is_down(KEY_START)) key_poll();
+
+    is_paused = true;
     while (is_paused)
     {
         vid_vsync();
         key_poll();
-        is_paused = !key_is_down(KEY_B);
+        is_paused = !key_is_down(KEY_B) && !key_released(KEY_START);
         if (key_is_down(KEY_R) && key_is_down(KEY_L))
         {
             game->level_id--;
