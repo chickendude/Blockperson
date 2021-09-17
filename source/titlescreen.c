@@ -32,6 +32,7 @@ void show_titlescreen(Game *game, OBJ_ATTR *obj_buffer)
 
     reset_level(game, obj_buffer);
 
+    key_poll();
     while (!key_released(KEY_START))
     {
         frames_in_titlescreen++;
@@ -74,7 +75,8 @@ void show_titlescreen(Game *game, OBJ_ATTR *obj_buffer)
 // Private functions definitions
 // -----------------------------------------------------------------------------
 
-void reset_level(Game *game, OBJ_ATTR *obj_buffer) {
+void reset_level(Game *game, OBJ_ATTR *obj_buffer)
+{
     game->level_id = 0;
     load_next_level(game, obj_buffer);
     load_moves(LEVEL_1_MOVES);

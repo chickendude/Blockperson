@@ -26,6 +26,7 @@ done
 # Start building
 cd gfx || exit
 clear
+#grit win_screen.png -gt -gB4 -Mw 1 -Mh 1
 #grit title_screen.png -gt -gB4 -Mw 1 -Mh 1
 #grit pause_screen.png -gt -gB4 -Mw 1 -Mh 1
 #grit background.png -gt -gB4 -Mw 2 -Mh 2

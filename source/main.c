@@ -8,9 +8,8 @@
 #include "block.h"
 #include "blockperson.h"
 #include "tiles.h"
-
-// TODO: Bug carrying block, carried block can go through level bricks
-// TODO: Can walk through blocks when going up
+// Tile data
+#include "win_screen.h"
 
 // Buffer to hold changes to OAM data so that you can update outside of VBLANK.
 // This will be copied over to OAM in VBLANK.
@@ -28,6 +27,9 @@ void play(Game *game);
 
 void pause(Game *game);
 
+/** Display the win message and wait for start to be pressed. */
+void show_win_screen();
+
 //------------------------------------------------------------------------------
 // Program entry point
 //------------------------------------------------------------------------------
@@ -35,9 +37,12 @@ void pause(Game *game);
 int main(void)
 {
     Game game;
-    initialize(&game);
-    show_titlescreen(&game, obj_buffer);
-    play(&game);
+    while (1) {
+        initialize(&game);
+        show_titlescreen(&game, obj_buffer);
+        play(&game);
+        show_win_screen();
+    }
     return 0;
 }
 
@@ -163,4 +168,17 @@ void pause(Game *game)
     }
 
     REG_DISPCNT &= ~DCNT_BG2;
+}
+
+void show_win_screen()
+{
+    // Copy win screen data over and turn on background 2 which will display it
+    memcpy32(&tile_mem[1][1], win_screenTiles, win_screenTilesLen / 4);
+    REG_DISPCNT |= DCNT_BG2;
+
+    while (!key_released(KEY_START))
+    {
+        vid_vsync();
+        key_poll();
+    }
 }
