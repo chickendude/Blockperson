@@ -81,7 +81,7 @@ const Level level_5 = {22, 14,
                        " BBB        B BBBBBBBB"
                        "            BBB       "};
 const Level level_6 = {21, 13,
-                       72, 38,
+                       88, 32,
                        " BBB             BBBB"
                        " B  BBBBBBBBBBBBB   B"
                        "BB                  B"
@@ -98,7 +98,7 @@ const Level level_6 = {21, 13,
 };
 
 const Level level_7 = {24, 14,
-                       72, 38,
+                       144, 64,
                        "  B   BBBBB   BB   BBB  "
                        " B B B     B B  B B   B "
                        " B  BB      BB   BB    B"
@@ -117,7 +117,7 @@ const Level level_7 = {24, 14,
 
 const Level level_8 = {
         27, 17,
-        72, 38,
+        192, 112,
         " BBB       BBBB   BBBBBBB  "
         "B   B     B    B B       B "
         "B    B   B     BB         B"
@@ -139,7 +139,7 @@ const Level level_8 = {
 
 const Level level_9 = {
         20, 16,
-        72, 38,
+        80, 32,
         "        BBB         "
         "       B   B        "
         "      B     B  BBBBB"
@@ -160,7 +160,7 @@ const Level level_9 = {
 
 const Level level_10 = {
         27, 19,
-        72, 38,
+        104, 96,
         "   BBBBBBBBBBBBBBBBBBBBB   "
         " BB           B         B  "
         "BBBBO       OOBO   OOO OBB "
@@ -184,7 +184,7 @@ const Level level_10 = {
 
 const Level level_11 = {
         29, 19,
-        72, 38,
+        88, 0,
         "BBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
         "B  B   B                    B"
         "B     OBOO            BBBBB B"
